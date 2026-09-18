@@ -1,0 +1,20 @@
+{
+  "bundle": "legacy-discovery-speckit-all-in-one",
+  "bundle_version": "1.0.0",
+  "created": "2026-08-28",
+  "spec_kit": {
+    "package": "specify-cli",
+    "version": "1.0.1",
+    "github_tag": "v1.0.1",
+    "integration": "copilot"
+  },
+  "legacy_discovery": {
+    "version": "2",
+    "active_skills": [
+      "analyze-legacy-solution",
+      "investigate-legacy-bug",
+      "analyze-change-impact",
+      "prepare-speckit-context"
+    ]
+  }
+}

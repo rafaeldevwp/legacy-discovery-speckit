@@ -1,0 +1,11 @@
+LEGACY DISCOVERY + SPEC KIT — PACOTE ÚNICO
+
+WINDOWS:
+1. Faça commit/stash do seu repositório.
+2. Dê dois cliques em INSTALAR-WINDOWS.bat.
+3. Informe a pasta raiz do repositório legado.
+4. Ao terminar, abra o repositório no VS Code + Copilot Agent Mode.
+5. Leia README.md para o primeiro uso.
+
+O instalador usa Spec Kit oficial 1.0.1 + Legacy Discovery V2.
+A primeira instalação requer internet.
