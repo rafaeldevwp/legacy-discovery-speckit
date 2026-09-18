@@ -9,7 +9,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
-BUNDLE_VERSION = "1.4.0"
+BUNDLE_VERSION = "1.4.1"
 LEGACY_DISCOVERY_VERSION = "2.4"
 DEFAULT_SPECKIT_VERSION = "1.0.1"
 ACTIVE_SKILLS = (

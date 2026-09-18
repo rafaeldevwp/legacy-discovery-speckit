@@ -1,0 +1,47 @@
+name: ci
+
+# Termômetro automático: higiene + checksums, suíte de não-regressão (Windows e Linux,
+# Python 3.11 e 3.13) e prova de que um zip gerado contém exatamente o pacote.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: testes (${{ matrix.os }}, py${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Higiene e checksums (SHA256SUMS.txt confere com cada arquivo)
+        run: python tools/build_release.py --check
+      - name: Suíte de não-regressão
+        run: python -m unittest discover -s tests -v
+
+  package:
+    name: zip gerado == pacote
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Gera o zip e verifica arquivo por arquivo
+        run: |
+          python tools/build_release.py --out-dir "$RUNNER_TEMP/dist" --name legacy-discovery-speckit-ci
+          git diff --exit-code -- SHA256SUMS.txt
+          python tools/build_release.py --verify-zip "$RUNNER_TEMP/dist/legacy-discovery-speckit-ci.zip"

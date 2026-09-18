@@ -3,7 +3,7 @@
 > **Do pedido do PM ao código, sem adivinhar e sem regressão.**
 > Este manual cobre o pacote inteiro — cada skill, cada comando, cada artefato, cada script e cada mensagem — e acompanha exemplos reais do começo ao fim.
 
-Versão do pacote: **bundle 1.4.0 · Legacy Discovery V2.4 · Spec Kit 1.0.1 · GitHub Copilot**.
+Versão do pacote: **bundle 1.4.1 · Legacy Discovery V2.4 · Spec Kit 1.0.1 · GitHub Copilot** · [baixar a última versão](https://github.com/rafaeldevwp/legacy-discovery-speckit/releases/latest)
 
 | Se você quer... | Vá para |
 |---|---|
@@ -128,7 +128,7 @@ O pacote é composto por:
 | **Contratos** | regras escritas: nomes, status, donos, handoffs, falhas | 5 documentos |
 | **Scripts** | Python puro que valida, indexa, gera IDs, mostra status, aprova, arquiva | 7 |
 | **Spec Kit oficial** | o framework de especificação do GitHub, versão fixada | 1.0.1 |
-| **Suíte de testes** | prova de não-regressão do próprio pacote | 106 testes |
+| **Suíte de testes** | prova de não-regressão do próprio pacote | 108 testes |
 
 ## 2. Para quem é e o que cada perfil usa
 
@@ -320,12 +320,12 @@ git status
 
 Se houver alteração pendente, faça commit ou stash antes. O instalador faz backup, mas é melhor ter tudo commitado.
 
-**Passo 2 — Baixe e descompacte** `legacy-discovery-speckit-v6.zip` em `C:\Ferramentas\`.
+**Passo 2 — Baixe e descompacte** o `legacy-discovery-speckit-v1.4.1.zip` da página de [Releases](https://github.com/rafaeldevwp/legacy-discovery-speckit/releases/latest) em `C:\Ferramentas\`.
 
 Opcional — confira a integridade do pacote antes de instalar:
 
 ```bash
-cd C:\Ferramentas\legacy-discovery-speckit-v6
+cd C:\Ferramentas\legacy-discovery-speckit-v1.4.1
 python tools/build_release.py --check
 ```
 
@@ -393,7 +393,7 @@ python install.py --target "C:\Projetos\ConsultaVeiculos"
 Se o repositório já tem o Spec Kit (v4 ou v5 instaladas), **não reinstale o Spec Kit**:
 
 ```bash
-python C:\Ferramentas\legacy-discovery-speckit-v6\install.py --target "C:\Projetos\ConsultaVeiculos" --skip-speckit-install --skip-speckit-init
+python C:\Ferramentas\legacy-discovery-speckit-v1.4.1\install.py --target "C:\Projetos\ConsultaVeiculos" --skip-speckit-install --skip-speckit-init
 ```
 
 | Item | O que acontece |
@@ -534,13 +534,13 @@ Esperado: o agente tenta, a fechadura nega (`Escrita bloqueada em src/teste-fech
 **12.5 — Provar a não-regressão do pacote** (na pasta do pacote, não no repo):
 
 ```bash
-cd C:\Ferramentas\legacy-discovery-speckit-v6
+cd C:\Ferramentas\legacy-discovery-speckit-v1.4.1
 python -m unittest discover -s tests -v
 python tools/build_release.py --check
 ```
 
 ```text
-Ran 106 tests in 19.3s
+Ran 108 tests in 20.1s
 OK
 release check passed
 ```
@@ -2346,7 +2346,7 @@ A história do PM (`## Story (verbatim)`) não é conferida. Em handoffs antigos
 
 - `python tools/build_release.py` (na pasta do pacote) recusa lixo (`backups/`, `.pyc`, `installation.json`), regenera o `SHA256SUMS.txt` e monta o zip em ordem fixa, igual em Windows e Linux;
 - `python tools/build_release.py --check` só confere; `--verify-zip <zip>` prova que o zip contém exatamente a pasta (arquivos, ordem e bytes);
-- no GitHub, o workflow `legacy-discovery-v6` roda higiene + 106 testes em Windows e Linux (Python 3.11 e 3.13) a cada PR e prova que o zip publicado contém exatamente a pasta publicada.
+- no GitHub, o workflow `ci.yml` roda higiene + 108 testes em Windows e Linux (Python 3.11 e 3.13) a cada PR e prova que o zip publicado contém exatamente a pasta publicada.
 
 ### 31.5 Quem garante cada regra
 
@@ -2367,7 +2367,7 @@ A história do PM (`## Story (verbatim)`) não é conferida. Em handoffs antigos
 | Fluxo guiado não aprova, não cria branch, não chama Spec Kit | `/legacy.story` |
 | Artefatos de skill não vão para o Git | `.git/info/exclude` + regra de todas as skills |
 | Skills nunca escrevem em `.specify/` ou `specs/` | contrato de ownership |
-| Pacote não regride | suíte `tests/` (106 testes) + **CI** |
+| Pacote não regride | suíte `tests/` (108 testes) + **CI** |
 
 ### 31.6 Donos: quem escreve o quê
 
@@ -2782,7 +2782,7 @@ fim       /legacy.validate          → a base está íntegra?
 
 ## 41. Convivência com o AgentQA
 
-O AgentQA (no mesmo catálogo) responde a outra pergunta: *essa entrega está pronta para release?* Os dois se completam:
+O AgentQA, se você o usa, responde a outra pergunta: *essa entrega está pronta para release?* Os dois se completam:
 
 ```text
 Legacy Discovery                     Spec Kit                         AgentQA
@@ -2815,7 +2815,11 @@ Para quem evolui o próprio pacote.
 ### 42.1 Estrutura do pacote
 
 ```text
-legacy-discovery-speckit-v6/
+legacy-discovery-speckit/        (o repositório — o pacote fica na raiz)
+├── .github/workflows/
+│   ├── ci.yml                  ← testes em Windows/Linux a cada PR e push na main
+│   └── release.yml             ← em cada tag vX.Y.Z: testes, zip, verificação e GitHub Release
+├── docs/MANUAL.md              ← este manual
 ├── install.py  install.ps1  install.sh  INSTALAR-WINDOWS.bat
 ├── bundle.json                 ← versões e lista de skills (os testes conferem com o install.py)
 ├── SHA256SUMS.txt              ← gerado pelo tools/build_release.py
@@ -2845,7 +2849,7 @@ legacy-discovery-speckit-v6/
 | **Testes da fechadura** | nega o que deve **e** permite o trabalho legítimo |
 | **Testes do instalador** | preserva conhecimento, `.git/info/exclude`, prompts e hooks de terceiros |
 | **Higiene de release** | sem `backups/`, `.pyc`, `installation.json`; checksums; zip verificável; ordem igual em Windows e Linux |
-| **CI** | tudo isso em Windows e Linux, Python 3.11 e 3.13, a cada PR |
+| **CI** | tudo isso em Windows e Linux, Python 3.11 e 3.13, a cada PR; a Release só sai se tudo passar |
 
 ### 42.3 Como mudar algo sem regressão
 
@@ -2857,7 +2861,7 @@ python -m unittest discover -s tests -v
 # 4. gere o release
 python tools/build_release.py
 python tools/build_release.py --check
-python tools/build_release.py --verify-zip ../legacy-discovery-speckit-v6.zip
+python tools/build_release.py --verify-zip ../legacy-discovery-speckit.zip
 ```
 
 Regras que valem ouro:
@@ -2878,9 +2882,12 @@ Regras que valem ouro:
 ### 42.5 Publicar uma versão
 
 1. `bundle.json`, `install.py` (`BUNDLE_VERSION`, `LEGACY_DISCOVERY_VERSION`) e `CHANGELOG-V2.md` atualizados (o teste confere que batem);
-2. `python tools/build_release.py`;
-3. pasta nova e isolada no catálogo (`legacy-discovery-vN-…/`), com `.gitattributes` (`* -text`), README e manual;
-4. PR; o CI roda sozinho.
+2. `python tools/build_release.py` (regenera o `SHA256SUMS.txt`) e commit;
+3. PR para a `main`; o `ci.yml` roda sozinho;
+4. depois do merge, crie a tag da versão: `git tag -a v1.4.2 -m v1.4.2 && git push origin v1.4.2`;
+5. o `release.yml` confere que a tag bate com o `bundle.json`, roda os testes, gera `legacy-discovery-speckit-vX.Y.Z.zip`, verifica o zip contra o repositório e publica a Release.
+
+Nunca commite zips: eles vivem nas Releases.
 
 ## 43. Migração e histórico de versões
 
@@ -2892,6 +2899,7 @@ Regras que valem ouro:
 | V2.2 | 1.2.0 (v4) | artefatos de skill local-only, `.git/info/exclude`, arquivamento, checkpoints humanos |
 | V2.3 | 1.3.0 (v5) | PO técnico `refine-user-story`, `STORY_REFINEMENT`, 13 comandos `/legacy.*`, `story_status.py`, testes de não-regressão |
 | V2.4 | 1.4.0 (v6) | fechadura (hook), aprovação só humana com lacre, `READY_FOR_REVIEW`, fiscal de evidência, release e CI |
+| V2.4.1 | 1.4.1 | repositório próprio, histórico em tags (`v0.1.0`…`v1.4.0`), pacotes em Releases, release automatizada por tag |
 
 **De V1 para V2+:** não apague `fix-plans/` nem RFCs — continuam válidos como histórico. Não crie novos `SPEC-FIX`/`DESIGN-FIX`/`TASKS-FIX` com o Spec Kit em uso. As skills V1 vão para `.github/legacy-workflow-v1/` (ou ficam ativas com `--keep-legacy-v1`, se você decidir).
 

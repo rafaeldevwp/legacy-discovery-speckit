@@ -1,6 +1,6 @@
 {
   "bundle": "legacy-discovery-speckit-all-in-one",
-  "bundle_version": "1.4.0",
+  "bundle_version": "1.4.1",
   "created": "2026-09-18",
   "spec_kit": {
     "package": "specify-cli",
@@ -22,5 +22,6 @@
   "governance": {
     "agent": "legacy-discovery",
     "hook": ".github/hooks/legacy_governance.py"
-  }
+  },
+  "repository": "https://github.com/rafaeldevwp/legacy-discovery-speckit"
 }

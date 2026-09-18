@@ -1,5 +1,14 @@
 # Legacy Discovery + Spec Kit — pacote único
 
+> Entender o sistema legado antes de mudá-lo, refinar a história do PM com um PO técnico e só então
+> especificar e implementar com o [Spec Kit](https://github.com/github/spec-kit) — com uma fechadura que
+> impede o agente de aprovar, escrever código de produção ou afrouxar as próprias regras.
+
+**⬇️ Baixe a última versão em [Releases](https://github.com/rafaeldevwp/legacy-discovery-speckit/releases/latest)** ·
+**📖 [Manual completo](docs/MANUAL.md)** ·
+**🧪 106+ testes de não-regressão em Windows e Linux**
+
+
 Este ZIP existe para você **não precisar instalar e juntar duas coisas manualmente**.
 
 Ele combina:
@@ -604,7 +613,7 @@ python install.py --target /caminho/repo --keep-legacy-v1
 # Versões deste pacote
 
 ```text
-Bundle:              1.4.0
+Bundle:              1.4.1
 Legacy Discovery:    V2.4
 Spec Kit / CLI:      1.0.1
 Integração padrão:   GitHub Copilot

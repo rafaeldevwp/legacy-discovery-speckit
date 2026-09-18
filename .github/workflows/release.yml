@@ -1,0 +1,63 @@
+name: release
+
+# Em cada tag vX.Y.Z: confere a versão, roda os testes, gera o zip, verifica e publica a GitHub Release.
+# Nenhum zip é commitado no repositório: eles vivem nas Releases.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: A tag bate com o bundle.json
+        run: |
+          VERSION=$(python -c "import json; print(json.load(open('bundle.json', encoding='utf-8'))['bundle_version'])")
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::A tag $GITHUB_REF_NAME não bate com o bundle.json (v$VERSION)"
+            exit 1
+          fi
+
+      - name: Higiene, checksums e testes
+        run: |
+          python tools/build_release.py --check
+          python -m unittest discover -s tests -v
+
+      - name: Gera e verifica o zip
+        run: |
+          NAME="legacy-discovery-speckit-$GITHUB_REF_NAME"
+          python tools/build_release.py --out-dir dist --name "$NAME"
+          git diff --exit-code -- SHA256SUMS.txt
+          python tools/build_release.py --verify-zip "dist/$NAME.zip"
+
+      - name: Notas da versão (do CHANGELOG)
+        run: |
+          python - "$GITHUB_REF_NAME" > notes.md <<'PY'
+          import re, sys
+          version = sys.argv[1].lstrip("v")
+          text = open("payload/legacy-discovery/CHANGELOG-V2.md", encoding="utf-8").read()
+          match = re.search(rf"^## [^\n]*bundle {re.escape(version)}\)[^\n]*\n(.*?)(?=^## |\Z)", text, re.M | re.S)
+          body = match.group(1).strip() if match else "Veja o CHANGELOG-V2.md."
+          print(body)
+          print()
+          print("---")
+          print("Instalação: baixe o zip abaixo, descompacte num caminho curto (ex.: C:\\Ferramentas\\) e execute INSTALAR-WINDOWS.bat.")
+          print("Manual: docs/MANUAL.md · Integridade: python tools/build_release.py --check")
+          PY
+          cat notes.md
+
+      - name: Publica a Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "dist/legacy-discovery-speckit-$GITHUB_REF_NAME.zip" \
+            --title "Legacy Discovery + Spec Kit $GITHUB_REF_NAME" --notes-file notes.md --verify-tag

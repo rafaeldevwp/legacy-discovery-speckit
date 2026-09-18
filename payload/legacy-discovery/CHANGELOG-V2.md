@@ -71,3 +71,16 @@ Their files remain under `legacy-workflow/` for history and rollback. V1 artifac
 - **fiscal**: `validate_artifacts.py` confere `arquivo:linha`, `EXISTING_TEST:arquivo::Teste` e IDs de artefatos citados (erro em refinamentos, `WARNING` em handoffs);
 - **termômetro**: `tools/build_release.py` (higiene, checksums, zip em ordem fixa e `--verify-zip`) e workflow de CI (Windows/Linux, Python 3.11/3.13);
 - **sem regressão**: as 5 skills da V2.2 e o workflow V1 seguem byte a byte; sem refinamentos, os scripts dão saída idêntica à V2.2; refinamentos aprovados na V2.3 continuam válidos (com aviso). 106 testes.
+
+## 2.4.1 — Repositório próprio (bundle 1.4.1)
+
+- o projeto passa a viver no repositório `rafaeldevwp/legacy-discovery-speckit`, com histórico das versões como tags
+  (`v0.1.0` a `v1.4.0`) e pacotes publicados em GitHub Releases;
+- `tools/build_release.py`: a infraestrutura do repositório na raiz (`.git/`, `.github/`, `.gitattributes`,
+  `.gitignore`) fica fora do pacote em vez de ser tratada como lixo; `--name` define o nome do zip;
+  `--verify-zip` descobre o nome pelo próprio zip; `copilot-knowledge/` e `.specify/` dentro do pacote são recusados
+  (artefatos de uso real);
+- manual completo em `docs/MANUAL.md`;
+- exemplos neutros nos testes e no manual (nomes fictícios);
+- workflows `ci.yml` (testes a cada PR) e `release.yml` (em cada tag `vX.Y.Z`: testes, zip, verificação e Release);
+- nenhum comportamento das skills, dos comandos, da fechadura ou do validador mudou. 108 testes.

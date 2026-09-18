@@ -421,7 +421,7 @@ class ReleaseHygiene(unittest.TestCase):
         tmp = Path(tempfile.mkdtemp(prefix="ldsk6r-"))
         try:
             copy = tmp / BUNDLE.name
-            shutil.copytree(BUNDLE, copy, ignore=shutil.ignore_patterns("__pycache__"))
+            shutil.copytree(BUNDLE, copy, ignore=shutil.ignore_patterns("__pycache__", ".git"))
             (copy / "backups").mkdir()
             refused = run(copy / "tools" / "build_release.py", "--out-dir", str(tmp / "out"))
             self.assertEqual(refused.returncode, 1)
@@ -435,8 +435,9 @@ class ReleaseHygiene(unittest.TestCase):
             self.assertEqual(zip_path.read_bytes(), digest_one)
             with zipfile.ZipFile(zip_path) as archive:
                 names = {n.split("/", 1)[1] for n in archive.namelist()}
+            infra = {".git", ".github", ".gitattributes", ".gitignore"}
             files = {p.relative_to(copy).as_posix() for p in copy.rglob("*")
-                     if p.is_file() and "__pycache__" not in p.parts}
+                     if p.is_file() and "__pycache__" not in p.parts and p.relative_to(copy).parts[0] not in infra}
             self.assertEqual(names, files)
             self.assertEqual(run(copy / "tools" / "build_release.py", "--check").returncode, 0)
             verified = run(copy / "tools" / "build_release.py", "--verify-zip", str(zip_path))
@@ -445,6 +446,46 @@ class ReleaseHygiene(unittest.TestCase):
             tampered = run(copy / "tools" / "build_release.py", "--verify-zip", str(zip_path))
             self.assertEqual(tampered.returncode, 1)
             self.assertIn("conteúdo diferente no zip", tampered.stderr)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
+    def test_repository_infrastructure_is_not_part_of_the_bundle(self) -> None:
+        """In its own repository the bundle has .github/ (workflows) at the root: excluded, not forbidden."""
+        tmp = Path(tempfile.mkdtemp(prefix="ldsk6i-"))
+        try:
+            copy = tmp / "repo"
+            shutil.copytree(BUNDLE, copy, ignore=shutil.ignore_patterns("__pycache__", ".git"))
+            fx.write(copy, ".github/workflows/ci.yml", "name: ci\n")
+            fx.write(copy, ".gitattributes", "* -text\n")
+            built = run(copy / "tools" / "build_release.py", "--out-dir", str(tmp / "out"), "--name", "pacote-v9.9.9")
+            self.assertEqual(built.returncode, 0, built.stderr)
+            with zipfile.ZipFile(tmp / "out" / "pacote-v9.9.9.zip") as archive:
+                names = archive.namelist()
+            self.assertTrue(all(n.startswith("pacote-v9.9.9/") for n in names))
+            self.assertFalse(any("/.github/" in n or n.endswith("/.gitattributes") for n in names))
+            self.assertNotIn(".github", (copy / "SHA256SUMS.txt").read_text(encoding="utf-8"))
+            verified = run(copy / "tools" / "build_release.py", "--verify-zip", str(tmp / "out" / "pacote-v9.9.9.zip"))
+            self.assertEqual(verified.returncode, 0, verified.stderr)
+            fx.write(copy, "payload/legacy-discovery/.github/x.md", "x")
+            nested = run(copy / "tools" / "build_release.py", "--check")
+            self.assertEqual(nested.returncode, 1)
+            self.assertIn("pasta proibida no pacote: payload/legacy-discovery/.github/", nested.stderr)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_usage_artifacts_are_refused(self) -> None:
+        tmp = Path(tempfile.mkdtemp(prefix="ldsk6u-"))
+        try:
+            copy = tmp / "repo"
+            shutil.copytree(BUNDLE, copy, ignore=shutil.ignore_patterns("__pycache__", ".git"))
+            for leftover in ("backups/Cliente-20260101/x.md", ".github/copilot-knowledge/INDEX.md",
+                             "payload/copilot-knowledge/INDEX.md", "payload/.specify/memory/constitution.md"):
+                fx.write(copy, leftover, "x")
+            result = run(copy / "tools" / "build_release.py", "--check")
+            self.assertEqual(result.returncode, 1)
+            for folder in ("backups/", "payload/copilot-knowledge/", "payload/.specify/"):
+                self.assertIn(f"pasta proibida no pacote: {folder}", result.stderr)
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
