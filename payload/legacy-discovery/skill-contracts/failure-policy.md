@@ -19,6 +19,6 @@ Use one of these reason codes:
 | `REGRESSION_FAILED` | complete regression found a reproducible failure |
 | `REGRESSION_UNSTABLE` | failure passed on the single diagnostic rerun |
 
-Implementation uses at most two focused correction attempts total per TASK, shared across unit test and solution build. Regression permits one diagnostic rerun without changes. Git synchronization and push never authorize force, reset, automatic merge, or unbounded retries.
+Implementation uses at most two focused correction attempts total per TASK, shared across unit test and solution build. Regression permits one diagnostic rerun without changes. Git synchronization never authorizes force, reset, automatic merge, or unbounded retries. Push is allowed only after gates pass and with skill-generated artifacts excluded from publication.
 
 Every block records: code, first relevant error, commands, attempts, changed files, current branch/HEAD, and the smallest human action needed to resume.

@@ -5,7 +5,7 @@ Este ZIP existe para você **não precisar instalar e juntar duas coisas manualm
 Ele combina:
 
 1. **GitHub Spec Kit oficial** — fixado em `specify-cli 1.0.1`;
-2. **Legacy Discovery V2** — suas Skills para entender o AS-IS de sistemas legados grandes;
+2. **Legacy Discovery V2.2** — suas Skills para entender o AS-IS de sistemas legados grandes;
 3. **instalador único** — inicializa o Spec Kit e instala as Skills no mesmo repositório;
 4. **Persistent Knowledge + HANDOFF** — a ponte entre Discovery e Spec Kit.
 
@@ -186,6 +186,8 @@ Decisões TO-BE pertencem ao Spec Kit.
 Não trate inferência como fato.
 ```
 
+Quando evoluir para `/speckit.plan`, preserve a arquitetura existente por padrão e use o HANDOFF apenas como base factual para enriquecer decisões.
+
 ## 2. Faça o primeiro mapa do legado
 
 No Copilot:
@@ -293,6 +295,20 @@ feature/mmYYYY/descricao-curta
 
 A Skill nunca executa `stash`, `reset`, `merge`, `rebase`, `force` ou `push` automaticamente. Se o worktree estiver sujo, `main` estiver divergente ou a branch já existir, ela bloqueia e pede decisão humana.
 
+# Política de versionamento (v4)
+
+- Artefatos gerados por skill permanecem local-only por padrão.
+- Escopo mínimo local-only: `.github/copilot-knowledge/` e `.github/legacy-discovery/installation.json`.
+- Artefatos gerados pelo Spec Kit (`.specify/` e `specs/`) seguem a política normal de versionamento da equipe.
+- O instalador configura `.git/info/exclude` local para reduzir stage acidental.
+
+Comando para arquivar artefatos/metadados da skill e reduzir poluição local:
+
+```bash
+python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive
+python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive-and-clean
+```
+
 # Quando usar cada Skill?
 
 | Quero... | Use |
@@ -383,8 +399,8 @@ python install.py --target /caminho/repo --keep-legacy-v1
 # Versões deste pacote
 
 ```text
-Bundle:              1.1.0
-Legacy Discovery:    V2.1
+Bundle:              1.2.0
+Legacy Discovery:    V2.2
 Spec Kit / CLI:      1.0.1
 Integração padrão:   GitHub Copilot
 Python mínimo:       3.11

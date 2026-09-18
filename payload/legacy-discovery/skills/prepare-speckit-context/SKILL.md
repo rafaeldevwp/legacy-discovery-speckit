@@ -34,6 +34,16 @@ A fronteira é rígida:
 AS-IS + evidência + constraints + unknowns  →  HANDOFF  →  Spec Kit
 ```
 
+## Interacao com humano
+
+Antes de gerar o handoff, confirme com o usuario:
+
+1. objetivo funcional da mudanca em uma frase;
+2. criterio de pronto esperado para o handoff;
+3. se o fluxo alvo e `SDD` ou `BUG`.
+
+Se houver ambiguidade, pergunte antes de classificar cobertura.
+
 ## Regra zero — Knowledge Preflight antes do source
 
 Comece com:
@@ -130,6 +140,17 @@ Defina `target_flow`:
 - `BUG` — somente quando o usuário quiser explicitamente usar a extensão oficial de bug do Spec Kit (`bug.assess → bug.fix → bug.test`).
 
 Para legado crítico ou mudança que exige revisão de requisitos/arquitetura antes da implementação, prefira `SDD`.
+
+## Guardrails para Constitution e Plan do Spec Kit
+
+Quando recomendar `/speckit.constitution`, oriente a preservar o AS-IS real do projeto:
+
+- contratos publicos existentes;
+- arquitetura e boundaries atuais;
+- stack e padroes ja adotados;
+- restricoes operacionais e regulatorias do ambiente.
+
+Quando recomendar `/speckit.plan`, oriente que o plano respeite a arquitetura existente e seja enriquecido pelos fatos do handoff, sem reescrever a historia do sistema.
 
 ## Critério de prontidão
 

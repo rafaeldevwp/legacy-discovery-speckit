@@ -45,6 +45,19 @@ Em projeto existente, a constitution deve capturar guardrails reais já aceitos 
 
 Não invente princípios apenas para preencher template.
 
+Ao escrever a constitution, preserve o AS-IS real do projeto. Nao reescreva historico tecnico e nao introduza padroes novos sem evidencias do contexto atual.
+
+## Plan
+
+Em projeto legado, o `/speckit.plan` deve respeitar a arquitetura existente e explicitar qualquer excecao como decisao deliberada do time.
+
+Regras praticas:
+
+- partir das restricoes e evidencias do `SPECKIT_HANDOFF`;
+- privilegiar evolucao incremental sobre substituicao ampla;
+- manter compatibilidade por padrao;
+- enriquecer o plano com conhecimento ja absorvido pelas skills, sem inventar fatos nao observados.
+
 ## Extensão oficial de bug
 
 O Spec Kit possui extensão opt-in de bug:

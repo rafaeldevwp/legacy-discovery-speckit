@@ -41,3 +41,18 @@ Se o nome existir local ou remotamente, bloquear com `BRANCH_EXISTS`. Não incre
 ## Publicação
 
 Esta Skill não faz push. Publicação pertence à etapa de implementação/revisão adotada pela equipe.
+
+## Escopo de versionamento bloqueado
+
+Para este fluxo, nenhum artefato gerado por skill pode ser versionado.
+
+Bloqueio minimo por caminho:
+
+- `.github/copilot-knowledge/`
+- `.github/legacy-discovery/installation.json`
+
+Mesmo fora desses caminhos, arquivos gerados por skill permanecem locais e nao podem ser publicados.
+
+Se esses caminhos/arquivos estiverem tracked, remover do indice antes de qualquer publicacao.
+
+Artefatos gerados pelo Spec Kit (`.specify/` e `specs/`) seguem a politica normal de versionamento da equipe.

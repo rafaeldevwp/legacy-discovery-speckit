@@ -1,11 +1,11 @@
 ---
 name: execute-fix-plan
-description: Executa uma tarefa por vez de um plano aprovado de correção .NET definido por SPEC, DESIGN e TASKS. Atualiza a main, cria uma branch feature/mmYYYY/slug, exige testes unitários focados quando aplicáveis e build da solution inteira, então cria e envia o commit para a branch remota antes de aguardar autorização humana para a próxima tarefa. Interrompe e registra bloqueios. Não executa regressão completa, PR, merge ou deploy.
+description: Executa uma tarefa por vez de um plano aprovado de correção .NET definido por SPEC, DESIGN e TASKS. Atualiza a main, cria uma branch feature/mmYYYY/slug, exige testes unitários focados quando aplicáveis e build da solution inteira, então cria e publica o commit na branch de feature sem versionar artefatos gerados por skill. Interrompe e registra bloqueios. Não executa regressão completa, PR, merge ou deploy.
 ---
 
 # Execute Fix Plan
 
-Você implementa um plano aprovado sem trabalhar em one-shot. Cada execução cobre exatamente uma `TASK-*`: implementar, rodar os testes unitários necessários, compilar a solution inteira, concluir, commitar e fazer push da branch. Depois, informe o resultado ao humano e pare até ele autorizar a próxima tarefa.
+Você implementa um plano aprovado sem trabalhar em one-shot. Cada execução cobre exatamente uma `TASK-*`: implementar, rodar os testes unitários necessários, compilar a solution inteira, concluir com commit e publicar na branch de feature. Depois, informe o resultado ao humano e pare até ele autorizar a próxima tarefa.
 
 ## Pré-condições
 
@@ -23,8 +23,9 @@ Leia todos os contratos compartilhados. Use `references/git-workflow.md` para di
 - Uma tarefa só fica concluída depois de build bem-sucedido da solution inteira; build de projeto isolado nunca libera o gate.
 - Quando a tarefa altera lógica executável, o teste unitário focado aplicável também precisa passar antes do commit.
 - Um commit corresponde a uma tarefa concluída e só é criado após todos os gates aplicáveis ficarem verdes.
-- Depois do commit, faça push somente da branch `feature/*` atual para `origin`. Nunca faça push direto em `main`.
-- Depois do push, apresente resumo, gates, commit remoto e próxima tarefa; pergunte explicitamente se deseja continuar e pare.
+- Depois do commit, faça push somente da branch de feature atual e nunca de `main`.
+- Antes do push, confirme que o staged/commit não inclui artefatos gerados por skill (ex.: `.github/`, `.specify/`, `specify/`, `specs/`).
+- Depois do push, apresente resumo, gates, commit publicado e próxima tarefa; pergunte explicitamente se deseja continuar e pare.
 - Se a recuperação do build ultrapassar o limite de tentativas ou o escopo da tarefa, pare e registre `BLOQUEADA`.
 - Não execute regressão completa; essa responsabilidade pertence à skill `run-solution-regression`.
 - Não abra PR, faça merge, qualquer rebase, force-push ou deploy.

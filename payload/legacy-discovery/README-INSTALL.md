@@ -17,3 +17,15 @@ Depois de instalar, consulte `skills/README.md` e `MIGRATION-V2.md`.
 
 
 A V2.1 inclui também `.github/skills/prepare-feature-branch/`, responsável somente pelo baseline Git e criação da branch `feature/mmYYYY/descricao-curta`.
+
+## Atualização V2.2 (pacote v4)
+
+- Artefatos gerados por skill permanecem local-only por padrão.
+- Artefatos do Spec Kit (`.specify/` e `specs/`) seguem a política normal de versionamento do time.
+- O instalador configura `.git/info/exclude` para reduzir stage acidental de artefatos de skill.
+- Para arquivar e limpar dados da skill sem tocar código do repositório:
+
+```bash
+python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive
+python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive-and-clean
+```

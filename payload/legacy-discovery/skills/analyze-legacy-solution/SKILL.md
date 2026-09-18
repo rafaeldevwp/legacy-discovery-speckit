@@ -7,6 +7,30 @@ description: Analisa uma solution .NET (C#) legada — moderna ou clássica — 
 
 Você entende e documenta o **AS-IS** de solutions .NET legadas com foco em economia de contexto, evidência e reuso.
 
+## Privacidade e versionamento
+
+Para repositórios com política de privacidade local, trate artefatos gerados por skill como
+**não versionáveis**.
+
+Regras obrigatórias neste modo:
+
+1. Não executar ações de staging/commit para conteúdo gerado pela skill.
+2. Considerar `.github/copilot-knowledge/` como conhecimento local de trabalho.
+3. Quando necessário, orientar o uso de `.git/info/exclude` para bloquear versionamento dos artefatos da skill.
+4. Artefatos do Spec Kit seguem a política normal do time.
+
+Se a política local disser que conhecimento não pode subir para remoto, priorize essa política.
+
+## Interacao com humano
+
+Antes de iniciar discovery amplo, confirme em linguagem objetiva:
+
+1. escopo funcional priorizado;
+2. profundidade desejada (estrutural ou completa);
+3. restricoes de tempo/custo de exploracao.
+
+Se houver ambiguidade de dominio, pare e faca uma pergunta curta antes de prosseguir.
+
 ## Regra de entrada — índice primeiro, cobertura depois
 
 Se existir `.github/copilot-knowledge/INDEX.md`:

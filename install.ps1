@@ -12,6 +12,12 @@ if ($SkipSpecKitInstall) { $argsList += "--skip-speckit-install" }
 if ($SkipSpecKitInit) { $argsList += "--skip-speckit-init" }
 if ($KeepLegacyV1) { $argsList += "--keep-legacy-v1" }
 
+$preferredPython = "C:\Program Files\Python314\python.exe"
+if (Test-Path $preferredPython) {
+    & $preferredPython @argsList
+    exit $LASTEXITCODE
+}
+
 if (Get-Command py -ErrorAction SilentlyContinue) {
     & py -3.11 @argsList
     exit $LASTEXITCODE

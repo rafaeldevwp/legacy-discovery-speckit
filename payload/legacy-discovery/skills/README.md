@@ -33,6 +33,16 @@ Na V2:
 - o **Spec Kit** passa a ser a única fonte de verdade para especificação, plano técnico, tarefas e implementação da mudança;
 - o contrato entre os dois lados é o `SPECKIT_HANDOFF`.
 
+## Politica global de privacidade
+
+Neste repositorio, todo artefato gerado por skill e local-only.
+
+- Nao publicar artefatos de skill em remoto, independentemente da pasta.
+- Caminhos com bloqueio minimo de versionamento: `.github/copilot-knowledge/` e `.github/legacy-discovery/installation.json`.
+- Artefatos de Spec Kit (`.specify/` e `specs/`) seguem a politica normal de versionamento da equipe.
+- Se artefatos de skill estiverem rastreados pelo Git, remova do indice (`git rm --cached`) antes de push.
+- Para reduzir risco de stage acidental, use o configurador local em `.git/info/exclude` fornecido pelo instalador.
+
 ## Skills ativas
 
 ### `analyze-legacy-solution`
@@ -78,6 +88,10 @@ Ela:
 4. investiga apenas gaps relevantes quando necessário;
 5. produz `handoffs/HANDOFF-*.md`;
 6. recomenda o próximo comando do Spec Kit, sem executá-lo automaticamente.
+
+### `prepare-feature-branch`
+
+Mantem o gate de governanca Git e cria branch de trabalho no padrao `feature/mmYYYY/descricao-curta` a partir de `main` atualizada por fast-forward.
 
 Principal saída:
 
@@ -181,7 +195,8 @@ Copie para o repositório:
 │   ├── analyze-legacy-solution/
 │   ├── investigate-legacy-bug/
 │   ├── analyze-change-impact/
-│   └── prepare-speckit-context/
+│   ├── prepare-speckit-context/
+│   └── prepare-feature-branch/
 └── skill-contracts/
 ```
 
@@ -206,6 +221,18 @@ Depois capture guardrails reais do projeto em `/speckit.constitution`.
 - **Progressive disclosure.** Monorepo grande não deve ser aprofundado inteiro por padrão.
 - **Uma fonte de verdade por responsabilidade.** A V2 não cria um segundo `SPEC/PLAN/TASKS`.
 - **Compatibilidade histórica.** Scripts continuam reconhecendo artefatos V1 existentes.
+- **Interatividade objetiva.** Skills confirmam escopo e ambiguidades com o humano antes de expandir investigacoes custosas.
+
+## Arquivamento de artefatos da skill
+
+Para reduzir poluicao local sem tocar artefatos do projeto, use:
+
+```bash
+python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive
+python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive-and-clean
+```
+
+O comando arquiva somente dados gerados pela skill.
 
 ## Workflow V1 arquivado
 

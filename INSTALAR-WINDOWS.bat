@@ -13,6 +13,11 @@ set /p TARGET=Repositorio:
 if "%TARGET%"=="" set "TARGET=%CD%"
 
 echo.
+if exist "C:\Program Files\Python314\python.exe" (
+  "C:\Program Files\Python314\python.exe" "%~dp0install.py" --target "%TARGET%"
+  goto :done
+)
+
 where py >nul 2>nul
 if %ERRORLEVEL%==0 (
   py -3.11 "%~dp0install.py" --target "%TARGET%"

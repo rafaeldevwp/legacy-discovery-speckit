@@ -2,7 +2,7 @@
 
 ## Select
 
-Read immutable `TASKS-FIX-NNNN.md` and `EXECUTION-FIX-NNNN.md`. Choose exactly one TASK whose dependencies are `PUBLISHED` in remote Git history. Record `IN_PROGRESS` in the ledger before editing. Never execute more than one TASK per human authorization.
+Read immutable `TASKS-FIX-NNNN.md` and `EXECUTION-FIX-NNNN.md`. Choose exactly one TASK whose dependencies are `PUBLISHED` in execution ledger + Git history. Record `IN_PROGRESS` in the ledger before editing. Never execute more than one TASK per human authorization.
 
 ## Implement
 

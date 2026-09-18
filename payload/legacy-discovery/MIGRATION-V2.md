@@ -81,3 +81,12 @@ SPECKIT_HANDOFF
 ## V2.1 — Git branch gate restaurado
 
 O comportamento Git que antes vivia dentro de `execute-fix-plan` volta como skill ativa independente `prepare-feature-branch`. O workflow antigo continua arquivado. O novo gate cria `feature/mmYYYY/descricao-curta` a partir de `main` sincronizada via fast-forward antes do `/speckit.specify`.
+
+## V2.2 — Governança de artefatos e interatividade
+
+- A criação de branch no fluxo de governança continua com a skill `prepare-feature-branch`.
+- Artefatos gerados por skill passam a ser local-only por padrão; artefatos do Spec Kit seguem política normal do time.
+- O instalador configura `.git/info/exclude` local para reduzir versionamento acidental de artefatos de skill.
+- Foi adicionado o comando `archive_skill_artifacts.py` para arquivar e opcionalmente limpar artefatos/metadados de skill sem alterar arquivos de código do repositório.
+- Skills ativas foram ajustadas com checkpoints de interação para reduzir ambiguidades antes de investigações custosas.
+- `prepare-speckit-context` reforça guardrails para `/speckit.constitution` e `/speckit.plan` respeitarem AS-IS e arquitetura existente.

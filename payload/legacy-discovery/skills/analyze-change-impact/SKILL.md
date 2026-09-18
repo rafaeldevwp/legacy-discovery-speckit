@@ -11,6 +11,16 @@ Você mapeia o **raio de impacto** de uma mudança planejada, antes que ela acon
 
 Se `.github/copilot-knowledge/` existir, use `SOLUTION-OVERVIEW.md`, `projects/PROJECT-*.md`, `decisions/ADR-*.md` e `deep-dives/DEEP-DIVE-*.md`. Antes de gravar, leia os contratos de nomes, lifecycle, ownership, handoffs e falhas em `.github/skill-contracts/`. Registre conhecimento estrutural descoberto em `knowledge_updates`; não edite artefatos de outro owner.
 
+## Interacao com humano
+
+Antes de mapear impacto, confirme:
+
+1. alvo exato da mudanca (classe, metodo, endpoint, contrato);
+2. tipo da mudanca (comportamento, assinatura, performance, infraestrutura);
+3. limite da analise (somente repositorio atual ou incluir consumidores externos conhecidos).
+
+Se o alvo estiver amplo demais, proponha um recorte e aguarde confirmacao.
+
 ## Estrutura de referências
 
 - `references/impact-mapping-process.md` — como levantar dependentes diretos (compilação), indiretos (chamada de serviço/WS), decisões arquiteturais relacionadas, e cobertura de teste existente — em fases de custo crescente, como as outras skills deste conjunto.

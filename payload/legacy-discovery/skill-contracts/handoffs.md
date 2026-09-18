@@ -65,7 +65,7 @@ Required:
 - all TASK commits discoverable by `[TASK-NNN]` in Git history;
 - `EXECUTION-FIX-NNNN.md` contains gates for every TASK;
 - full solution build passed after each TASK;
-- no blocked or push-blocked TASK.
+- no blocked TASK.
 
 ### Regression → verification
 

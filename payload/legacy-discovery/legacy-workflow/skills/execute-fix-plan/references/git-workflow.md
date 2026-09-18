@@ -47,4 +47,6 @@ git push -u origin feature/mmYYYY/descricao-curta  # first published commit
 git push origin feature/mmYYYY/descricao-curta     # later commits
 ```
 
-Push only the recorded feature branch. Never push `main`, tags, or another branch. A failed push produces `PUSH_BLOCKED`; preserve the local commit and stop.
+Push only the recorded feature branch. Never push `main`, tags, or another branch.
+Before push, ensure no skill-generated artifacts are included (for example `.github/`, `.specify/`, `specify/`, `specs/`).
+A failed push produces `PUSH_BLOCKED`; preserve the local commit and stop.

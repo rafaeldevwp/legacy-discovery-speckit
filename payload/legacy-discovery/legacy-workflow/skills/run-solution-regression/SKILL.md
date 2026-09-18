@@ -11,9 +11,9 @@ Antes de começar, leia os contratos de nomes, lifecycle, ownership, handoffs e 
 
 ## Pré-condições
 
-- Todas as `TASK-*` possuem estado runtime derivado `PUBLISHED`, commit e branch remota da FIX.
+- Todas as `TASK-*` possuem estado runtime derivado `PUBLISHED` e commit local verificavel no historico Git local.
 - `EXECUTION-FIX-{NNNN}.md` contém build verde da solution para cada tarefa.
-- O worktree está limpo, na branch da FIX e o HEAD local corresponde ao commit publicado no remoto.
+- O worktree está limpo e na branch da FIX, com HEAD local coerente com `EXECUTION-FIX-{NNNN}.md`.
 - `DESIGN-FIX-{NNNN}.md` aprovado declara `solution_path`, `build_configuration`, `build_command`, `regression_command` e `regression_scope`.
 
 Se qualquer pré-condição falhar, registre `status: BLOCKED` sem iniciar uma regressão parcial apresentada como completa.

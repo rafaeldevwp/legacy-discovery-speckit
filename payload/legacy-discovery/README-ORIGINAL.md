@@ -61,6 +61,14 @@ HANDOFF
 Spec Kit
 ```
 
+### Atualização V2.2 (pacote v4)
+
+- artefatos gerados por skill ficam local-only por padrão;
+- artefatos do Spec Kit (`.specify/` e `specs/`) seguem política normal do time;
+- governança de branch continua com `prepare-feature-branch`;
+- `constitution` e `plan` do Spec Kit devem respeitar AS-IS e arquitetura existente;
+- novas checkpoints de interação com humano reduzem ambiguidade nas skills ativas.
+
 ---
 
 # 2. O que você precisa instalar
@@ -895,6 +903,13 @@ Para sincronizar o índice:
 python .github/skill-contracts/scripts/sync_index.py --root .github/copilot-knowledge
 ```
 
+Para arquivar (e opcionalmente limpar) apenas artefatos da skill:
+
+```bash
+python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive
+python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive-and-clean
+```
+
 Depois valide novamente:
 
 ```bash
@@ -915,7 +930,8 @@ meu-legado/
 │   │   ├── analyze-legacy-solution/
 │   │   ├── investigate-legacy-bug/
 │   │   ├── analyze-change-impact/
-│   │   └── prepare-speckit-context/
+│   │   ├── prepare-speckit-context/
+│   │   └── prepare-feature-branch/
 │   │
 │   ├── skill-contracts/
 │   │   └── scripts/

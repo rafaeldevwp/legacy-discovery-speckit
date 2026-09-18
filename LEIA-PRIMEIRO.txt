@@ -7,5 +7,10 @@ WINDOWS:
 4. Ao terminar, abra o repositório no VS Code + Copilot Agent Mode.
 5. Leia README.md para o primeiro uso.
 
-O instalador usa Spec Kit oficial 1.0.1 + Legacy Discovery V2.1.
+O instalador usa Spec Kit oficial 1.0.1 + Legacy Discovery V2.2.
 A primeira instalação requer internet.
+
+Politica V4:
+- Artefatos gerados pelas skills ficam locais (nao versionar/publicar).
+- Artefatos do Spec Kit podem seguir a politica normal do time.
+- Use o comando de arquivamento para limpar artefatos locais de skill quando necessario.

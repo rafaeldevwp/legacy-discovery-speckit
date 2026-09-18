@@ -7,6 +7,8 @@ python .github/skill-contracts/scripts/next_id.py --root .github/copilot-knowled
 python .github/skill-contracts/scripts/next_id.py --root .github/copilot-knowledge --type ADR
 python .github/skill-contracts/scripts/validate_artifacts.py --root .github/copilot-knowledge
 python .github/skill-contracts/scripts/sync_index.py --root .github/copilot-knowledge
+python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive
+python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive-and-clean
 ```
 
 Legacy ID types `FIX` and `RFC` remain supported for repositories with V1 history.
@@ -14,5 +16,6 @@ Legacy ID types `FIX` and `RFC` remain supported for repositories with V1 histor
 - `next_id.py` reads existing names and prints the next four-digit ID without writing.
 - `validate_artifacts.py` validates names, metadata, owners and lifecycle; it also validates the V2 `SPECKIT_HANDOFF` contract and keeps compatibility checks for V1 FIX artifacts.
 - `sync_index.py` is the only writer of `INDEX.md`; identical inputs produce identical output and now indexes handoffs separately.
+- `archive_skill_artifacts.py` archives only skill-generated artifacts (`.github/copilot-knowledge/` and `.github/legacy-discovery/installation.json`) to a zip outside the repository by default, and can optionally clean them from the working tree.
 
 The required order after artifact changes is: validate artifacts, rebuild the index, validate again. Never hand-edit the generated index.

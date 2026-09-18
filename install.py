@@ -3,14 +3,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
 
-BUNDLE_VERSION = "1.1.0"
+BUNDLE_VERSION = "1.2.0"
 DEFAULT_SPECKIT_VERSION = "1.0.1"
 ACTIVE_SKILLS = (
     "analyze-legacy-solution",
@@ -48,6 +47,29 @@ def backup_if_exists(target: Path, backup_root: Path, relative: str) -> None:
     dst = backup_root / relative
     say(f"Backup: {relative}")
     copy_path(src, dst)
+
+
+def ensure_git_info_exclude(target: Path) -> None:
+    """Keep skill-generated artifacts local without affecting tracked project files."""
+    exclude = target / ".git" / "info" / "exclude"
+    exclude.parent.mkdir(parents=True, exist_ok=True)
+    existing = exclude.read_text(encoding="utf-8") if exclude.exists() else ""
+    marker_start = "# legacy-discovery-speckit-v4 local-only artifacts (managed)"
+    marker_end = "# end legacy-discovery-speckit-v4 local-only artifacts"
+    block = (
+        f"{marker_start}\n"
+        ".github/copilot-knowledge/\n"
+        ".github/legacy-discovery/installation.json\n"
+        f"{marker_end}\n"
+    )
+    if marker_start in existing and marker_end in existing:
+        start = existing.index(marker_start)
+        end = existing.index(marker_end) + len(marker_end)
+        rebuilt = existing[:start] + block + existing[end:]
+    else:
+        prefix = existing if not existing or existing.endswith("\n") else existing + "\n"
+        rebuilt = prefix + ("\n" if prefix and not prefix.endswith("\n\n") else "") + block
+    exclude.write_text(rebuilt, encoding="utf-8", newline="\n")
 
 
 def detect_uv() -> str | None:
@@ -106,7 +128,7 @@ def archive_legacy_v1(target: Path, keep: bool) -> list[str]:
 
 
 def install_discovery(bundle_root: Path, target: Path, keep_legacy_v1: bool) -> None:
-    say("\n[3/4] Instalando Legacy Discovery V2...")
+    say("\n[3/4] Instalando Legacy Discovery V2.2...")
     payload = bundle_root / "payload" / "legacy-discovery"
     target_skills = target / ".github" / "skills"
     target_contracts = target / ".github" / "skill-contracts"
@@ -150,6 +172,8 @@ def install_discovery(bundle_root: Path, target: Path, keep_legacy_v1: bool) -> 
             newline="\n",
         )
 
+    ensure_git_info_exclude(target)
+
 
 def write_install_metadata(target: Path, version: str) -> None:
     meta_dir = target / ".github" / "legacy-discovery"
@@ -159,7 +183,7 @@ def write_install_metadata(target: Path, version: str) -> None:
         "bundle_version": BUNDLE_VERSION,
         "spec_kit_version": version,
         "integration": "copilot",
-        "legacy_discovery_version": "2.1",
+        "legacy_discovery_version": "2.2",
         "installed_at_utc": datetime.now(timezone.utc).isoformat(),
         "active_skills": list(ACTIVE_SKILLS),
     }
@@ -170,7 +194,7 @@ def write_install_metadata(target: Path, version: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Instala Spec Kit oficial + Legacy Discovery V2 em um repositório existente."
+        description="Instala Spec Kit oficial + Legacy Discovery V2.2 em um repositório existente."
     )
     parser.add_argument("--target", default=".", help="Raiz do repositório legado")
     parser.add_argument("--spec-kit-version", default=DEFAULT_SPECKIT_VERSION)
@@ -247,6 +271,7 @@ def main() -> int:
     say("  3) Para uma US: 'Use prepare-speckit-context para esta mudança: ...'")
     say("  4) Quando o HANDOFF estiver READY_FOR_SPECKIT, use prepare-feature-branch")
     say("  5) Depois execute /speckit.specify")
+    say("  6) Para arquivar dados locais da skill: python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive-and-clean")
     say("\nRevise o resultado com: git status / git diff")
     say(f"Backup: {backup_root}")
     return 0

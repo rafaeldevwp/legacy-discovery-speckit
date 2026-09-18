@@ -46,6 +46,16 @@ Antes de criar a branch:
 
 Se qualquer condição falhar, pare e reporte o motivo. Não tente "corrigir" o repositório automaticamente.
 
+## Interacao com humano
+
+Antes da criacao da branch, confirme:
+
+1. descricao curta que sera usada no slug;
+2. branch base esperada (`main` por padrao);
+3. se a execucao e apenas preparacao Git ou ja antecede o `/speckit.specify`.
+
+Se o slug ficar ambiguo ou muito generico, proponha 1 alternativa curta e aguarde confirmacao.
+
 ## Padrão de branch
 
 Formato obrigatório:

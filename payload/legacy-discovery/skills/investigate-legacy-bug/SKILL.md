@@ -13,6 +13,16 @@ Se `.github/copilot-knowledge/` existir, leia `INDEX.md`, `projects/PROJECT-*.md
 
 **Se não existir nada ainda (cenário mais comum na prática — ninguém roda análise macro só por precaução), não bloqueie e não exija isso como pré-requisito.** Investigue normalmente. Preserve descobertas reutilizáveis no próprio `INVESTIGATION` e em `knowledge_updates`; não edite artefatos pertencentes a outra skill. Ver "Construção orgânica do harness" em `triage-process.md`.
 
+## Interacao com humano
+
+Antes da triagem tecnica, confirme:
+
+1. sintoma observado e comportamento esperado;
+2. ambiente e janela temporal do problema;
+3. impacto de negocio e urgencia.
+
+Quando houver mais de uma interpretacao possivel do bug, pergunte antes de aprofundar.
+
 ## Processo
 
 1. `references/triage-process.md` — como estreitar do sintoma relatado até 1-3 candidatos prováveis, em fases de custo crescente. **Pare assim que a confiança for alta o suficiente** — não é preciso passar por todas as fases se a resposta já apareceu cedo.

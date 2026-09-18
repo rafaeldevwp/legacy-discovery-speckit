@@ -36,3 +36,14 @@ Their files remain under `legacy-workflow/` for history and rollback. V1 artifac
 - worktree sujo, divergência e branch existente bloqueiam;
 - proibidos stash/reset/merge/rebase/force/push automáticos;
 - `prepare-speckit-context` agora recomenda branch antes de `/speckit.specify`.
+
+## 2.2 — Governance hardening, local-only skill artifacts and archive command
+
+- politica de versionamento refinada: artefatos gerados por skill ficam local-only por padrao;
+- artefatos do Spec Kit (`.specify/` e `specs/`) permanecem sob politica normal de versionamento do time;
+- fluxo de governanca Git mantido sob responsabilidade da skill `prepare-feature-branch`;
+- adicionada configuracao automatica de `.git/info/exclude` para evitar stage acidental de artefatos de skill;
+- novo comando `archive_skill_artifacts.py` para arquivar e opcionalmente limpar artefatos/metadados de skill sem tocar dados de codigo do repositorio;
+- orientacoes reforcadas para `constitution` do Spec Kit respeitar o AS-IS real do projeto;
+- orientacoes reforcadas para `plan` respeitar a arquitetura existente e enriquecer decisoes com evidencias do handoff;
+- maior interatividade nas skills ativas com checkpoints de confirmacao para reduzir ambiguidades.
