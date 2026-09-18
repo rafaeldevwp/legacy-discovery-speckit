@@ -7,7 +7,7 @@
 4. writes <name>.zip (default: the folder name) next to the bundle, or in --out-dir,
    with sorted entries and fixed timestamps.
 
-Repository infrastructure at the root (.git/, .github/, .gitattributes, .gitignore) is not part of the
+Repository infrastructure at the root (.git/, .github/, .gitattributes, .gitignore, dist/) is not part of the
 bundle: it is left out of SHA256SUMS.txt and of the zip, and is not treated as forbidden.
 
 Usage (from anywhere):  python tools/build_release.py [--out-dir DIR] [--name NAME] [--check] [--verify-zip ZIP]
@@ -27,7 +27,7 @@ from pathlib import Path
 
 BUNDLE = Path(__file__).resolve().parents[1]
 SUMS = "SHA256SUMS.txt"
-REPO_INFRA = {".git", ".github", ".gitattributes", ".gitignore"}
+REPO_INFRA = {".git", ".github", ".gitattributes", ".gitignore", "dist"}
 FORBIDDEN_DIRS = {"backups", "copilot-knowledge", ".specify", ".github", "node_modules", ".venv", "venv"}
 FORBIDDEN_SUFFIXES = {".pyc", ".pyo", ".log", ".zip"}
 
