@@ -10,7 +10,6 @@ from datetime import datetime
 from pathlib import Path
 
 from artifact_lib import parse_artifact
-from refinement_rules import check_refinement
 
 
 COMMON = {"schema_version", "artifact_type", "id", "status", "owner_skill", "created_at", "updated_at"}
@@ -18,7 +17,7 @@ OWNERS = {
     "SOLUTION_OVERVIEW": "analyze-legacy-solution", "PROJECT": "analyze-legacy-solution",
     "ADR": "analyze-legacy-solution", "RFC": "analyze-legacy-solution", "DEEP_DIVE": "analyze-legacy-solution",
     "INVESTIGATION": "investigate-legacy-bug", "IMPACT_ANALYSIS": "analyze-change-impact",
-    "SPECKIT_HANDOFF": "prepare-speckit-context", "STORY_REFINEMENT": "refine-user-story",
+    "SPECKIT_HANDOFF": "prepare-speckit-context",
     "FIX_SPEC": "coordinate-fix", "FIX_DESIGN": "coordinate-fix", "FIX_TASKS": "coordinate-fix",
     "FIX_EXECUTION": "execute-fix-plan", "FIX_REGRESSION": "run-solution-regression", "FIX_VERIFICATION": "coordinate-fix",
 }
@@ -29,7 +28,6 @@ STATUSES = {
     "INVESTIGATION": {"STATIC_HYPOTHESIS", "CONFIRMED", "REFUTED", "BLOCKED"},
     "IMPACT_ANALYSIS": {"COMPLETE", "PARTIAL", "BLOCKED"},
     "SPECKIT_HANDOFF": {"READY_FOR_SPECKIT", "PARTIAL", "BLOCKED"},
-    "STORY_REFINEMENT": {"READY_FOR_SPECKIT", "AWAITING_HUMAN", "BLOCKED"},
     "FIX_REGRESSION": {"PASSED", "FAILED", "UNSTABLE", "BLOCKED"},
     "FIX_SPEC": {"DRAFT", "READY_FOR_APPROVAL", "APPROVED", "BLOCKED"},
     "FIX_DESIGN": {"DRAFT", "READY_FOR_APPROVAL", "APPROVED", "BLOCKED"},
@@ -43,7 +41,6 @@ NAME_PATTERNS = {
     "DEEP_DIVE": r"DEEP-DIVE-[a-z0-9]+(?:-[a-z0-9]+)+\.md", "INVESTIGATION": r"INVESTIGATION-\d{8}-[a-z0-9]+(?:-[a-z0-9]+)*\.md",
     "IMPACT_ANALYSIS": r"IMPACT-\d{8}-[a-z0-9]+(?:-[a-z0-9]+)*\.md",
     "SPECKIT_HANDOFF": r"HANDOFF-\d{4}-[a-z0-9]+(?:-[a-z0-9]+)*\.md",
-    "STORY_REFINEMENT": r"REFINEMENT-\d{4}-[a-z0-9]+(?:-[a-z0-9]+)*\.md",
     "FIX_SPEC": r"SPEC-FIX-\d{4}\.md", "FIX_DESIGN": r"DESIGN-FIX-\d{4}\.md", "FIX_TASKS": r"TASKS-FIX-\d{4}\.md",
     "FIX_EXECUTION": r"EXECUTION-FIX-\d{4}\.md", "FIX_REGRESSION": r"REGRESSION-FIX-\d{4}\.md", "FIX_VERIFICATION": r"VERIFICATION-FIX-\d{4}\.md",
 }
@@ -52,7 +49,7 @@ FIX_PREFIX = {"FIX_SPEC": "SPEC", "FIX_DESIGN": "DESIGN", "FIX_TASKS": "TASKS", 
 DIRECTORIES = {
     "SOLUTION_OVERVIEW": ".", "PROJECT": "projects", "ADR": "decisions", "RFC": "proposals",
     "DEEP_DIVE": "deep-dives", "INVESTIGATION": "investigations", "IMPACT_ANALYSIS": "impact-analyses",
-    "SPECKIT_HANDOFF": "handoffs", "STORY_REFINEMENT": "refinements",
+    "SPECKIT_HANDOFF": "handoffs",
 }
 REQUIRED_BY_KIND = {
     "SOLUTION_OVERVIEW": {"solution_name", "solution_path"},
@@ -60,7 +57,6 @@ REQUIRED_BY_KIND = {
     "INVESTIGATION": {"symptom", "confidence", "confirmed_test"},
     "IMPACT_ANALYSIS": {"target", "risk", "investigation"},
     "SPECKIT_HANDOFF": {"request", "target_flow", "confidence", "source_access"},
-    "STORY_REFINEMENT": {"story_ref", "handoff", "revision", "decision_owner", "open_questions", "source_access", "reviewed_by", "reviewed_at", "block_reason"},
     "FIX_DESIGN": {"solution_path", "build_configuration", "build_command", "regression_command", "regression_scope"},
     "FIX_EXECUTION": {"branch", "remote_url", "base_commit", "base_build", "solution_path", "spec_digest", "design_digest", "tasks_digest", "block_reason"},
     "FIX_REGRESSION": {"branch", "tested_commit", "solution_path", "build_command", "regression_command", "block_reason"},
@@ -72,7 +68,7 @@ def expected_id(kind: str, path: Path) -> str:
     stem = path.stem
     if kind in {"ADR", "RFC"}:
         return "-".join(stem.split("-")[:2])
-    if kind in {"SPECKIT_HANDOFF", "STORY_REFINEMENT"}:
+    if kind == "SPECKIT_HANDOFF":
         return "-".join(stem.split("-")[:2])
     return stem
 
@@ -187,11 +183,6 @@ def main() -> int:
                 continue
             if not (path.parent / target).resolve().exists():
                 errors.append(f"{path}: broken local Markdown link {target}")
-
-    handoffs = {a.metadata.get("id", ""): a for a in artifacts if a.metadata.get("artifact_type") == "SPECKIT_HANDOFF"}
-    for refinement in artifacts:
-        if refinement.metadata.get("artifact_type") == "STORY_REFINEMENT" and COMMON <= set(refinement.metadata):
-            errors.extend(check_refinement(refinement, handoffs))
 
     for fix_dir in sorted(root.glob("fix-plans/FIX-[0-9][0-9][0-9][0-9]-*")):
         number = fix_dir.name[4:8]

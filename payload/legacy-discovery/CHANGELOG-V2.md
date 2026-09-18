@@ -47,3 +47,19 @@ Their files remain under `legacy-workflow/` for history and rollback. V1 artifac
 - orientacoes reforcadas para `constitution` do Spec Kit respeitar o AS-IS real do projeto;
 - orientacoes reforcadas para `plan` respeitar a arquitetura existente e enriquecer decisoes com evidencias do handoff;
 - maior interatividade nas skills ativas com checkpoints de confirmacao para reduzir ambiguidades.
+
+## 2.3 — PO técnico: refine-user-story (bundle 1.3.0)
+
+- adicionada skill `refine-user-story`: analisa a história do PM contra o AS-IS e gera `STORY_REFINEMENT` (refinamento técnico / planejamento de execução);
+- novo artefato `refinements/REFINEMENT-{NNNN}-{slug}.md`, owner único `refine-user-story`, status `READY_FOR_SPECKIT`, `AWAITING_HUMAN`, `BLOCKED`;
+- escada de ambiguidades `STORY → KNOWLEDGE → CODE → HUMAN`; intenção de negócio sempre vai ao humano;
+- `READY_FOR_SPECKIT` exige handoff pronto, nenhuma pergunta bloqueante aberta, revisão humana registrada e rastreabilidade AC/GR/SLICE — verificado por `validate_artifacts.py` (`refinement_rules.py`);
+- `next_id.py --type REFINEMENT`; `sync_index.py` agrupa refinamentos após os handoffs;
+- novos códigos em `failure-policy.md`: `HANDOFF_MISSING`, `HUMAN_DECISION_REQUIRED`, `STORY_CONFLICTS_WITH_AS_IS`;
+- instalador cria `copilot-knowledge/refinements/` e faz backup de `.github/skills/refine-user-story`;
+- **comandos `/legacy.*`** para todas as skills (prompt files em `.github/prompts/`), no mesmo espírito dos `/speckit.*`: `help`, `story`, `analyze`, `bug`, `impact`, `handoff`, `refine`, `answer`, `approve`, `branch`, `status`, `validate`, `archive`;
+- `/legacy.story` encadeia handoff → refinamento e para em cada decisão humana; `/legacy.approve` é o único caminho de aprovação humana e desfaz a aprovação se o validador recusar;
+- novo script somente-leitura `story_status.py` (estado das histórias e próximo comando);
+- instalador grava apenas `legacy.*.prompt.md` e registra os comandos em `installation.json`; outros prompts não são tocados;
+- **sem regressão**: as 5 skills anteriores e o workflow V1 não foram alterados; sem refinamentos, os scripts produzem saída idêntica à V2.2 — provado pela suíte `tests/` do pacote;
+- `SHA256SUMS.txt` regenerado (o da V2.2 estava desatualizado em 27 arquivos); pastas `backups/` e `__pycache__/` removidas do pacote distribuído.

@@ -58,6 +58,7 @@ Valid `FIX_REGRESSION` results: `PASSED`, `FAILED`, `UNSTABLE`, `BLOCKED`.
 | `INVESTIGATION` | `STATIC_HYPOTHESIS`, `CONFIRMED`, `REFUTED`, `BLOCKED` |
 | `IMPACT_ANALYSIS` | `COMPLETE`, `PARTIAL`, `BLOCKED` |
 | `SPECKIT_HANDOFF` | `READY_FOR_SPECKIT`, `PARTIAL`, `BLOCKED` |
+| `STORY_REFINEMENT` | `READY_FOR_SPECKIT`, `AWAITING_HUMAN`, `BLOCKED` |
 
 Use somente essas constantes no frontmatter. Texto de apresentação pode traduzi-las, mas não substituí-las.
 
@@ -71,6 +72,21 @@ Use somente essas constantes no frontmatter. Texto de apresentação pode traduz
 - `BLOCKED` — falta evidência indispensável para um handoff seguro.
 
 O handoff não possui estados de implementação. O lifecycle TO-BE pertence ao Spec Kit.
+
+## Story refinement
+
+```text
+(intake) → AWAITING_HUMAN ⇄ (respostas do humano, revision+1) → READY_FOR_SPECKIT
+         ↘ BLOCKED (pré-condição ausente: handoff, conhecimento stale, conflito)
+```
+
+`STORY_REFINEMENT` status semantics:
+
+- `AWAITING_HUMAN` — existe ao menos uma ambiguidade `OPEN_HUMAN`; nada avança até a resposta;
+- `READY_FOR_SPECKIT` — handoff relacionado `READY_FOR_SPECKIT`, nenhuma `OPEN_HUMAN` bloqueante, AC/GR/SLICE rastreáveis e revisão humana registrada (`reviewed_by`, `reviewed_at`);
+- `BLOCKED` — pré-condição que resposta a pergunta não resolve; exige `block_reason`.
+
+Somente o humano pode fazer um refinamento chegar a `READY_FOR_SPECKIT`: a skill grava `reviewed_by` apenas após confirmação explícita na conversa. O refinamento não possui estados de implementação.
 
 ## Common frontmatter
 

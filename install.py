@@ -9,7 +9,8 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
-BUNDLE_VERSION = "1.2.0"
+BUNDLE_VERSION = "1.3.0"
+LEGACY_DISCOVERY_VERSION = "2.3"
 DEFAULT_SPECKIT_VERSION = "1.0.1"
 ACTIVE_SKILLS = (
     "analyze-legacy-solution",
@@ -17,8 +18,10 @@ ACTIVE_SKILLS = (
     "analyze-change-impact",
     "prepare-speckit-context",
     "prepare-feature-branch",
+    "refine-user-story",
 )
 LEGACY_V1_SKILLS = ("coordinate-fix", "execute-fix-plan", "run-solution-regression")
+COMMAND_PREFIX = "legacy."
 
 
 def say(msg: str = "") -> None:
@@ -127,8 +130,26 @@ def archive_legacy_v1(target: Path, keep: bool) -> list[str]:
     return found
 
 
+def bundle_commands(bundle_root: Path) -> list[str]:
+    prompts = bundle_root / "payload" / "legacy-discovery" / "prompts"
+    return sorted(p.name for p in prompts.glob(f"{COMMAND_PREFIX}*.prompt.md"))
+
+
+def install_commands(bundle_root: Path, target: Path) -> list[str]:
+    """Copy only the bundle's legacy.*.prompt.md files; other prompts are never touched."""
+    source = bundle_root / "payload" / "legacy-discovery" / "prompts"
+    destination = target / ".github" / "prompts"
+    destination.mkdir(parents=True, exist_ok=True)
+    installed = []
+    for name in bundle_commands(bundle_root):
+        shutil.copy2(source / name, destination / name)
+        installed.append(name)
+    say(f"Comandos instalados: {len(installed)} (/legacy.*) em .github/prompts/")
+    return installed
+
+
 def install_discovery(bundle_root: Path, target: Path, keep_legacy_v1: bool) -> None:
-    say("\n[3/4] Instalando Legacy Discovery V2.2...")
+    say("\n[3/4] Instalando Legacy Discovery V" + LEGACY_DISCOVERY_VERSION + "...")
     payload = bundle_root / "payload" / "legacy-discovery"
     target_skills = target / ".github" / "skills"
     target_contracts = target / ".github" / "skill-contracts"
@@ -148,6 +169,7 @@ def install_discovery(bundle_root: Path, target: Path, keep_legacy_v1: bool) -> 
     shutil.copytree(payload / "skill-contracts", target_contracts)
 
     archive_legacy_v1(target, keep_legacy_v1)
+    install_commands(bundle_root, target)
 
     docs = target / ".github" / "legacy-discovery"
     docs.mkdir(parents=True, exist_ok=True)
@@ -159,7 +181,7 @@ def install_discovery(bundle_root: Path, target: Path, keep_legacy_v1: bool) -> 
     knowledge = target / ".github" / "copilot-knowledge"
     for name in (
         "projects", "decisions", "deep-dives", "proposals", "investigations",
-        "impact-analyses", "handoffs", "fix-plans"
+        "impact-analyses", "handoffs", "fix-plans", "refinements"
     ):
         (knowledge / name).mkdir(parents=True, exist_ok=True)
     index = knowledge / "INDEX.md"
@@ -175,7 +197,7 @@ def install_discovery(bundle_root: Path, target: Path, keep_legacy_v1: bool) -> 
     ensure_git_info_exclude(target)
 
 
-def write_install_metadata(target: Path, version: str) -> None:
+def write_install_metadata(target: Path, version: str, commands: list[str] | None = None) -> None:
     meta_dir = target / ".github" / "legacy-discovery"
     meta_dir.mkdir(parents=True, exist_ok=True)
     data = {
@@ -183,9 +205,10 @@ def write_install_metadata(target: Path, version: str) -> None:
         "bundle_version": BUNDLE_VERSION,
         "spec_kit_version": version,
         "integration": "copilot",
-        "legacy_discovery_version": "2.2",
+        "legacy_discovery_version": LEGACY_DISCOVERY_VERSION,
         "installed_at_utc": datetime.now(timezone.utc).isoformat(),
         "active_skills": list(ACTIVE_SKILLS),
+        "commands": ["/" + name[: -len(".prompt.md")] for name in (commands or [])],
     }
     (meta_dir / "installation.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -194,7 +217,7 @@ def write_install_metadata(target: Path, version: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Instala Spec Kit oficial + Legacy Discovery V2.2 em um repositório existente."
+        description=f"Instala Spec Kit oficial + Legacy Discovery V{LEGACY_DISCOVERY_VERSION} em um repositório existente."
     )
     parser.add_argument("--target", default=".", help="Raiz do repositório legado")
     parser.add_argument("--spec-kit-version", default=DEFAULT_SPECKIT_VERSION)
@@ -233,6 +256,7 @@ def main() -> int:
         ".github/skills/analyze-change-impact",
         ".github/skills/prepare-speckit-context",
         ".github/skills/prepare-feature-branch",
+        ".github/skills/refine-user-story",
         ".github/skills/coordinate-fix",
         ".github/skills/execute-fix-plan",
         ".github/skills/run-solution-regression",
@@ -251,7 +275,7 @@ def main() -> int:
         say("\n[2/4] Inicialização do Spec Kit ignorada por opção.")
 
     install_discovery(bundle_root, target, args.keep_legacy_v1)
-    write_install_metadata(target, args.spec_kit_version)
+    write_install_metadata(target, args.spec_kit_version, bundle_commands(bundle_root))
 
     say("\n[4/4] Validando estrutura instalada...")
     missing = []
@@ -262,16 +286,22 @@ def main() -> int:
         raise RuntimeError("Skills ausentes após instalação: " + ", ".join(missing))
     if not (target / ".github" / "skill-contracts" / "scripts" / "validate_artifacts.py").exists():
         raise RuntimeError("skill-contracts não foram instalados corretamente")
+    missing_commands = [n for n in bundle_commands(bundle_root) if not (target / ".github" / "prompts" / n).exists()]
+    if missing_commands:
+        raise RuntimeError("Comandos ausentes após instalação: " + ", ".join(missing_commands))
 
     say("\nINSTALAÇÃO CONCLUÍDA.")
     say("\nAgora abra a raiz do repositório no VS Code e use o Copilot em Agent Mode.")
+    say("Comandos das skills: digite /legacy.help no chat do Copilot.")
     say("Primeiro uso recomendado:")
     say("  1) /speckit.constitution")
     say("  2) Peça: 'Use analyze-legacy-solution para iniciar o mapa deste legado.'")
-    say("  3) Para uma US: 'Use prepare-speckit-context para esta mudança: ...'")
-    say("  4) Quando o HANDOFF estiver READY_FOR_SPECKIT, use prepare-feature-branch")
-    say("  5) Depois execute /speckit.specify")
-    say("  6) Para arquivar dados locais da skill: python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive-and-clean")
+    say("  3) Para uma US do PM: /legacy.story <história literal>")
+    say("     Responda com /legacy.answer e aprove com /legacy.approve (só você aprova)")
+    say("  4) Acompanhe com /legacy.status")
+    say("  5) Com o REFINEMENT em READY_FOR_SPECKIT: /legacy.branch <descrição>")
+    say("  6) Depois execute /speckit.specify")
+    say("  7) Para arquivar dados locais da skill: python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive-and-clean")
     say("\nRevise o resultado com: git status / git diff")
     say(f"Backup: {backup_root}")
     return 0

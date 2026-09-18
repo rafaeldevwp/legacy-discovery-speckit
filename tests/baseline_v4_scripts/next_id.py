@@ -10,7 +10,6 @@ from pathlib import Path
 
 PATTERNS = {
     "HANDOFF": re.compile(r"(?:^|/)HANDOFF-(\d{4})(?:-|\.|$)"),
-    "REFINEMENT": re.compile(r"(?:^|/)REFINEMENT-(\d{4})(?:-|\.|$)"),
     "FIX": re.compile(r"(?:^|/)FIX-(\d{4})(?:-|/|$)"),
     "ADR": re.compile(r"(?:^|/)ADR-(\d{4})(?:-|\.|$)"),
     "RFC": re.compile(r"(?:^|/)RFC-(\d{4})(?:-|\.|$)"),

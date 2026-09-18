@@ -18,7 +18,6 @@ GROUPS = [
     ("Investigações", {"INVESTIGATION"}),
     ("Análises de impacto", {"IMPACT_ANALYSIS"}),
     ("Handoffs para Spec Kit", {"SPECKIT_HANDOFF"}),
-    ("Refinamentos de histórias (PO)", {"STORY_REFINEMENT"}),
     ("Histórico V1 — planos e execução de correções", {"FIX_SPEC", "FIX_DESIGN", "FIX_TASKS", "FIX_EXECUTION", "FIX_REGRESSION", "FIX_VERIFICATION"}),
 ]
 

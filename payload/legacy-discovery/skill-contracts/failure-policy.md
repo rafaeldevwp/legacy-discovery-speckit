@@ -10,6 +10,9 @@ Use one of these reason codes:
 | `DISCOVERY_BUDGET_EXHAUSTED` | bounded discovery reached its configured limit before closing a relevant gap |
 | `EVIDENCE_INSUFFICIENT` | available knowledge/source evidence cannot support a reliable AS-IS conclusion |
 | `KNOWLEDGE_STALE` | persisted knowledge is known or strongly indicated to be outdated for the requested area |
+| `HANDOFF_MISSING` | a story refinement needs AS-IS context and no related `SPECKIT_HANDOFF` exists |
+| `HUMAN_DECISION_REQUIRED` | a business/intent ambiguity cannot be answered by story, knowledge or code |
+| `STORY_CONFLICTS_WITH_AS_IS` | the story contradicts an observed behavior or compatibility constraint without saying it changes |
 | `PLAN_INVALID` | SPEC/DESIGN/TASKS or traceability is incomplete |
 | `PLAN_CHANGED` | an approved plan digest differs from the execution baseline |
 | `UNIT_TEST_FAILED` | required focused unit test failed |

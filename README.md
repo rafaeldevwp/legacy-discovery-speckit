@@ -5,7 +5,7 @@ Este ZIP existe para você **não precisar instalar e juntar duas coisas manualm
 Ele combina:
 
 1. **GitHub Spec Kit oficial** — fixado em `specify-cli 1.0.1`;
-2. **Legacy Discovery V2.2** — suas Skills para entender o AS-IS de sistemas legados grandes;
+2. **Legacy Discovery V2.3** — suas Skills para entender o AS-IS de sistemas legados grandes e refinar histórias antes do Spec Kit;
 3. **instalador único** — inicializa o Spec Kit e instala as Skills no mesmo repositório;
 4. **Persistent Knowledge + HANDOFF** — a ponte entre Discovery e Spec Kit.
 
@@ -101,11 +101,12 @@ Automaticamente:
 2. instala specify-cli 1.0.1 oficial
 3. executa Spec Kit no repositório existente
 4. configura integração GitHub Copilot
-5. instala suas 5 Skills ativas (4 de Discovery + 1 de Git)
+5. instala suas 6 Skills ativas (4 de Discovery + 1 de PO + 1 de Git)
 6. instala os contratos e scripts do Knowledge Store
 7. cria .github/copilot-knowledge
 8. arquiva skills antigas da V1, sem apagá-las
-9. valida a estrutura instalada
+9. instala os comandos `/legacy.*` em `.github/prompts/`
+10. valida a estrutura instalada
 ```
 
 O comando de inicialização equivalente é:
@@ -123,13 +124,14 @@ A estrutura principal será semelhante a:
 ```text
 SEU-LEGADO/
 ├── .github/
-│   ├── prompts/                  ← Spec Kit / Copilot
+│   ├── prompts/                  ← Spec Kit / Copilot + comandos legacy.*.prompt.md
 │   ├── skills/
 │   │   ├── analyze-legacy-solution/
 │   │   ├── investigate-legacy-bug/
 │   │   ├── analyze-change-impact/
 │   │   ├── prepare-speckit-context/
-│   │   └── prepare-feature-branch/
+│   │   ├── prepare-feature-branch/
+│   │   └── refine-user-story/
 │   ├── skill-contracts/
 │   ├── copilot-knowledge/
 │   │   ├── INDEX.md
@@ -138,7 +140,8 @@ SEU-LEGADO/
 │   │   ├── deep-dives/
 │   │   ├── investigations/
 │   │   ├── impact-analyses/
-│   │   └── handoffs/
+│   │   ├── handoffs/
+│   │   └── refinements/
 │   └── legacy-discovery/
 ├── .specify/                     ← Spec Kit
 ├── specs/                        ← features do Spec Kit
@@ -205,6 +208,49 @@ Não peça para estudar milhares de arquivos profundamente de uma vez.
 
 ---
 
+# Comandos `/legacy.*` — suas skills como comandos
+
+Assim como o Spec Kit tem `/speckit.*`, o pacote instala comandos `/legacy.*` no Copilot (prompt files em `.github/prompts/`). No chat em Agent Mode, digite `/legacy.` e escolha.
+
+| Comando | O que faz | Skill / script |
+|---|---|---|
+| `/legacy.help` | Lista os comandos e sugere o próximo passo de cada história | `story_status.py` |
+| `/legacy.story <história>` | **Fluxo guiado**: handoff → refinamento, parando em cada decisão humana | várias |
+| `/legacy.analyze <área>` | Mapeia o AS-IS | `analyze-legacy-solution` |
+| `/legacy.bug <sintoma>` | Investiga bug, sem corrigir | `investigate-legacy-bug` |
+| `/legacy.impact <alvo>` | Raio de impacto | `analyze-change-impact` |
+| `/legacy.handoff <mudança>` | Gera o HANDOFF (AS-IS da mudança) | `prepare-speckit-context` |
+| `/legacy.refine <história>` | PO técnico gera o REFINEMENT | `refine-user-story` |
+| `/legacy.answer <REFINEMENT> AMB-02: …` | Registra suas respostas às perguntas | `refine-user-story` |
+| `/legacy.approve <REFINEMENT> revisor: <nome>` | Registra sua revisão e libera `READY_FOR_SPECKIT` | `refine-user-story` + validador |
+| `/legacy.branch <descrição>` | Cria `feature/mmYYYY/...` a partir da `main` | `prepare-feature-branch` |
+| `/legacy.status [ID]` | Estado das histórias e próximo comando (somente leitura) | `story_status.py` |
+| `/legacy.validate` | Valida contratos e reconstrói o INDEX | `validate_artifacts.py`, `sync_index.py` |
+| `/legacy.archive [limpar]` | Arquiva artefatos locais das skills | `archive_skill_artifacts.py` |
+
+Fluxo completo de uma história do PM, só com comandos:
+
+```text
+/legacy.story <história do PM>
+/legacy.answer REFINEMENT-0001 AMB-02: A; AMB-03: 24 horas
+/legacy.approve REFINEMENT-0001 revisor: <seu nome>
+/legacy.branch tratar-timeout-consulta
+/speckit.specify <história do PM>. Leia o HANDOFF-0001 e o REFINEMENT-0001.
+/speckit.clarify → /speckit.plan → /speckit.tasks → /speckit.analyze → /speckit.implement → /speckit.converge
+```
+
+Os comandos **não** trocam as skills: são atalhos que carregam a skill certa com as entradas certas. Os guardrails continuam nas skills e nos scripts de contrato. Garantias:
+
+- prefixo próprio `legacy.` — não colide com `/speckit.*`;
+- o instalador só grava arquivos `legacy.*.prompt.md`; qualquer outro prompt em `.github/prompts/` fica intacto;
+- `/legacy.story` nunca cria branch nem chama o Spec Kit, e nunca aprova;
+- `/legacy.approve` é o único caminho de aprovação, é digitado por você e desfaz a aprovação se o validador recusar;
+- `/legacy.branch` recusa seguir se a história tem refinamento ainda não aprovado.
+
+Pedir as skills pelo nome (`Use a skill ... para ...`) continua funcionando como antes.
+
+---
+
 # Uso diário — nova User Story
 
 Imagine:
@@ -245,7 +291,17 @@ Quando retornar:
 READY_FOR_SPECKIT
 ```
 
-primeiro crie a branch de trabalho:
+refine a história com o PO técnico:
+
+```text
+Use a skill refine-user-story para refinar esta história do PM:
+
+<história literal do PM>
+
+Use o HANDOFF gerado como base AS-IS.
+```
+
+Responda as perguntas que ela devolver. Quando o refinamento estiver `READY_FOR_SPECKIT` (só acontece após sua revisão), crie a branch de trabalho:
 
 ```text
 Use a skill prepare-feature-branch para esta mudança.
@@ -309,6 +365,90 @@ python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mod
 python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive-and-clean
 ```
 
+# Refinamento técnico com PO — `refine-user-story`
+
+Quando o PM entrega uma User Story, a skill `refine-user-story` faz o papel de **PO técnico**: confronta a história com o AS-IS já descoberto e produz um `STORY_REFINEMENT` — o artefato de planejamento de execução (refinamento técnico) que o Spec Kit vai consumir.
+
+```text
+História do PM ──► prepare-speckit-context ──► HANDOFF (AS-IS)
+                                                   │
+                                                   ▼
+                                          refine-user-story
+                                                   │
+                     ┌─────────────────────────────┼──────────────────────────┐
+                     ▼                             ▼                          ▼
+               AWAITING_HUMAN               READY_FOR_SPECKIT              BLOCKED
+          perguntas ao humano ─resposta─►  (após revisão humana)      (falta handoff/…)
+                                                   │
+                                                   ▼
+                              prepare-feature-branch ──► /speckit.specify …
+```
+
+Exemplo de pedido:
+
+```text
+Use a skill refine-user-story para refinar esta história do PM:
+
+<cole a história exatamente como o PM escreveu>
+
+Use o HANDOFF-0003 como base AS-IS.
+Quem decide regra de negócio: <nome do PM>.
+```
+
+## O que o refinamento contém
+
+- a história **literal** do PM, separada de qualquer interpretação;
+- avaliação INVEST + Definition of Ready;
+- registro de ambiguidades `AMB-NN`, cada uma com a fonte que a respondeu;
+- critérios de aceite `AC-NN` (Given/When/Then), cada um com origem rastreável;
+- guardrails de regressão `GR-NN`: o que não pode mudar e como será provado;
+- plano de execução em fatias `SLICE-NN`, com ordem, AC/GR cobertos e o passo do ferramental;
+- o que **não** foi decidido (fica para o humano e para o `/speckit.plan`).
+
+## Ambiguidades: quem responde
+
+**O código responde "como é hoje". Só o humano responde "como deve ser".**
+
+```text
+STORY → KNOWLEDGE (handoff/impact/…) → CODE (só fato AS-IS, até 8 arquivos) → HUMAN
+```
+
+Intenção de negócio, escopo, conflito entre história e AS-IS, contrato externo e dado sensível vão **direto** ao humano. A pergunta é fechada, com opções e consequência; a sugestão do PO nunca é aplicada sem resposta.
+
+## Guardrails verificados por script
+
+`validate_artifacts.py` recusa um refinamento `READY_FOR_SPECKIT` quando:
+
+- o handoff relacionado não existe ou não está `READY_FOR_SPECKIT`;
+- há pergunta `OPEN_HUMAN` bloqueante;
+- não há revisão humana (`reviewed_by` / `reviewed_at`);
+- um AC nasce de pergunta não respondida, ou não tem origem;
+- algum AC ou guardrail não está coberto por nenhuma fatia, ou há ciclo entre fatias;
+- faltam guardrails de regressão (ou a justificativa `NO_EXISTING_BEHAVIOR_AFFECTED`).
+
+A skill não escreve em `.specify/`/`specs/`, não decide arquitetura, não cria tasks de código, não mexe em Git e não edita artefatos de outras skills. O refinamento é **local-only**, como os demais artefatos de skill.
+
+---
+
+# Testes de não-regressão do pacote
+
+O pacote traz `tests/` (não é instalado no repositório). Rode na raiz do pacote:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+A suíte prova que:
+
+- sem refinamentos, `validate_artifacts.py`, `sync_index.py` e `next_id.py` produzem **saída idêntica, byte a byte,** à da versão anterior (cópia congelada em `tests/baseline_v4_scripts/`);
+- os arquivos das 5 skills anteriores e do workflow V1 são idênticos aos da versão anterior (`tests/baseline_v4_skill_digests.json`);
+- o instalador preserva conhecimento existente, `.git/info/exclude` e o arquivamento V1;
+- cada guardrail do refinamento recusa o caso que deveria recusar.
+
+> No Windows, descompacte o pacote num caminho curto (ex.: `C:\Ferramentas\`). Caminhos acima de 260 caracteres fazem o Python ignorar arquivos profundos.
+
+---
+
 # Quando usar cada Skill?
 
 | Quero... | Use |
@@ -317,6 +457,7 @@ python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mod
 | investigar bug complexo | `investigate-legacy-bug` |
 | saber o raio de impacto | `analyze-change-impact` |
 | preparar uma US para o Spec Kit | `prepare-speckit-context` |
+| refinar a história do PM (PO técnico) | `refine-user-story` |
 | criar a branch segura da mudança | `prepare-feature-branch` |
 | especificar o TO-BE | `/speckit.specify` |
 | definir arquitetura futura | `/speckit.plan` |
@@ -337,6 +478,10 @@ QUERO MUDAR
 prepare-speckit-context
       ↓
 HANDOFF
+      ↓
+refine-user-story  ⇄  humano responde
+      ↓
+REFINEMENT
       ↓
 prepare-feature-branch
       ↓
@@ -399,8 +544,8 @@ python install.py --target /caminho/repo --keep-legacy-v1
 # Versões deste pacote
 
 ```text
-Bundle:              1.2.0
-Legacy Discovery:    V2.2
+Bundle:              1.3.0
+Legacy Discovery:    V2.3
 Spec Kit / CLI:      1.0.1
 Integração padrão:   GitHub Copilot
 Python mínimo:       3.11

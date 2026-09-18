@@ -27,6 +27,32 @@ Forbidden in this handoff:
 - remediation proposal presented as decided design;
 - writes to `.specify/`.
 
+## Handoff → Story refinement
+
+`refine-user-story` consome um `SPECKIT_HANDOFF` relacionado à história. Sem handoff, o refinamento só pode ficar `AWAITING_HUMAN` ou `BLOCKED` (`HANDOFF_MISSING`). Handoff `PARTIAL`/`BLOCKED` impede refinamento `READY_FOR_SPECKIT`; seus unknowns bloqueantes entram no registro de ambiguidades.
+
+## Story refinement → Spec Kit
+
+A `STORY_REFINEMENT` `READY_FOR_SPECKIT` must contain:
+
+- a história do PM literal, separada da interpretação;
+- registro de ambiguidades com fonte (`STORY`, `KNOWLEDGE`, `CODE`, `HUMAN`) e evidência ou resposta humana;
+- nenhuma ambiguidade `OPEN_HUMAN` bloqueante;
+- critérios de aceite `AC-NN` com origem (`STORY`, `HUMAN:AMB-NN` respondida, `AS-IS:<evidência>`);
+- guardrails de regressão `GR-NN` com prova (`EXISTING_TEST`, `CHARACTERIZATION_TEST_REQUIRED`, `MANUAL_CHECK`);
+- plano de execução em fatias `SLICE-NN` cobrindo todo AC e todo GR, sem ciclo;
+- seção explícita do que **não** foi decidido;
+- revisão humana registrada.
+
+Forbidden in this refinement:
+
+- arquitetura TO-BE, biblioteca/framework, nova camada;
+- tasks de código, arquivos a alterar, estimativa em horas;
+- AC derivado de suposição não confirmada pelo humano;
+- writes to `.specify/`, `specs/` ou artefatos de outro owner.
+
+O `/speckit.specify` lê o handoff (AS-IS) **e** o refinamento (AC, respostas humanas, guardrails, fatias). O refinamento não substitui `/speckit.clarify`: ambiguidades não bloqueantes seguem para lá.
+
 ## Investigation → handoff
 
 A confirmed investigation may be consumed by `prepare-speckit-context` when the requested change is related to the investigated behavior. `STATIC_HYPOTHESIS` can support only `PARTIAL` handoff unless independent evidence closes the uncertainty.

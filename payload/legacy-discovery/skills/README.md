@@ -89,6 +89,16 @@ Ela:
 5. produz `handoffs/HANDOFF-*.md`;
 6. recomenda o próximo comando do Spec Kit, sem executá-lo automaticamente.
 
+### `refine-user-story`
+
+PO técnico entre a história do PM e o Spec Kit. Consome o `SPECKIT_HANDOFF` da mudança, avalia a história (INVEST + DoR), resolve ambiguidades pela escada `STORY → KNOWLEDGE → CODE → HUMAN`, reporta ao humano tudo que o código não responde e monta o refinamento técnico: critérios de aceite rastreáveis, guardrails de regressão e fatias de execução.
+
+Principal saída:
+
+- `refinements/REFINEMENT-{NNNN}-{slug}.md` (`artifact_type: STORY_REFINEMENT`).
+
+Só fica `READY_FOR_SPECKIT` com handoff pronto, sem pergunta bloqueante aberta e com revisão humana registrada. Não escreve spec/plan/tasks, não decide arquitetura, não implementa.
+
 ### `prepare-feature-branch`
 
 Mantem o gate de governanca Git e cria branch de trabalho no padrao `feature/mmYYYY/descricao-curta` a partir de `main` atualizada por fast-forward.
@@ -96,6 +106,10 @@ Mantem o gate de governanca Git e cria branch de trabalho no padrao `feature/mmY
 Principal saída:
 
 - `handoffs/HANDOFF-{NNNN}-{slug}.md` (`artifact_type: SPECKIT_HANDOFF`).
+
+## Comandos `/legacy.*`
+
+Cada skill tem um comando no Copilot (prompt files em `.github/prompts/`, fonte em `prompts/` deste pacote): `/legacy.analyze`, `/legacy.bug`, `/legacy.impact`, `/legacy.handoff`, `/legacy.refine`, `/legacy.branch`, mais `/legacy.story` (fluxo guiado), `/legacy.answer`, `/legacy.approve`, `/legacy.status`, `/legacy.validate`, `/legacy.archive` e `/legacy.help`. Ver `prompts/README.md`.
 
 ## Persistent Knowledge
 
@@ -108,7 +122,8 @@ Principal saída:
 ├── deep-dives/
 ├── investigations/
 ├── impact-analyses/
-└── handoffs/
+├── handoffs/
+└── refinements/
 ```
 
 Diretórios antigos como `proposals/` e `fix-plans/` continuam aceitos pelos scripts para compatibilidade com repositórios que já possuem histórico da V1, mas não são produzidos pelo fluxo ativo da V2.
@@ -152,13 +167,15 @@ Dimensões avaliadas:
 2. Analise impacto quando necessário
 3. prepare-speckit-context
 4. Revise HANDOFF
-5. /speckit.specify
-6. /speckit.clarify
-7. /speckit.plan
-8. /speckit.tasks
-9. /speckit.analyze
-10. /speckit.implement
-11. /speckit.converge
+5. refine-user-story (responda as perguntas; revise o REFINEMENT)
+6. prepare-feature-branch
+7. /speckit.specify (lendo HANDOFF + REFINEMENT)
+8. /speckit.clarify
+9. /speckit.plan
+10. /speckit.tasks
+11. /speckit.analyze
+12. /speckit.implement
+13. /speckit.converge
 ```
 
 ## Fluxo de bug
@@ -196,7 +213,8 @@ Copie para o repositório:
 │   ├── investigate-legacy-bug/
 │   ├── analyze-change-impact/
 │   ├── prepare-speckit-context/
-│   └── prepare-feature-branch/
+│   ├── prepare-feature-branch/
+│   └── refine-user-story/
 └── skill-contracts/
 ```
 

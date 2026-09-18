@@ -10,6 +10,7 @@ Each artifact type has one writer. Other skills may read it or record a requeste
 | `INVESTIGATION` and the bug-demonstrating test | `investigate-legacy-bug` |
 | `IMPACT` | `analyze-change-impact` |
 | `SPECKIT_HANDOFF` | `prepare-speckit-context` |
+| `STORY_REFINEMENT` | `refine-user-story` |
 | Git branch `feature/mmYYYY/descricao-curta` | `prepare-feature-branch` |
 | `INDEX.md` | deterministic `sync_index.py` script |
 | Spec Kit `spec.md`, `plan.md`, `tasks.md` and managed `.specify/` artifacts | **Spec Kit**, nunca estas skills |
@@ -45,6 +46,8 @@ The owner applies the delta in a later explicit refresh. Never silently cross-wr
 Nenhuma skill desta camada escreve diretamente em `.specify/` ou altera artefatos gerenciados pelo Spec Kit. A integração acontece exclusivamente por leitura/referência de `SPECKIT_HANDOFF`.
 
 O fluxo de governanca de branch continua sob responsabilidade da skill `prepare-feature-branch`.
+
+A intenção de negócio pertence ao humano (PM/PO declarado em `decision_owner`). `refine-user-story` é dona da clareza do refinamento, não das decisões: respostas humanas são registradas literalmente e nunca inferidas.
 
 ## Politica global de privacidade e versionamento
 

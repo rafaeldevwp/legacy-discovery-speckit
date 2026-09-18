@@ -29,3 +29,12 @@ A V2.1 inclui também `.github/skills/prepare-feature-branch/`, responsável som
 python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive
 python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive-and-clean
 ```
+
+## Atualização V2.3 (bundle 1.3.0)
+
+- Nova skill `.github/skills/refine-user-story/` (PO técnico que refina a história do PM).
+- Novo diretório local-only `.github/copilot-knowledge/refinements/`.
+- Novo script `.github/skill-contracts/scripts/refinement_rules.py` (usado por `validate_artifacts.py`).
+- Novo script somente-leitura `.github/skill-contracts/scripts/story_status.py`.
+- Comandos `/legacy.*`: copie `prompts/legacy.*.prompt.md` → `.github/prompts/` (o instalador faz isso). Não copie o `README.md` de `prompts/`.
+- Nenhuma skill anterior foi alterada. Atualizar a partir da V2.2 preserva `.github/copilot-knowledge/`.

@@ -16,6 +16,7 @@ Use type-first names. Sequential IDs use four digits; dates use `YYYYMMDD`; slug
 | Investigation | `INVESTIGATION-{YYYYMMDD}-{slug}.md` |
 | Impact analysis | `IMPACT-{YYYYMMDD}-{slug}.md` |
 | Spec Kit handoff | `HANDOFF-{NNNN}-{slug}.md` |
+| Story refinement (PO) | `REFINEMENT-{NNNN}-{slug}.md` em `refinements/` |
 
 ## V1 compatibility artifacts
 
@@ -39,6 +40,9 @@ Allocate sequential IDs with `.github/skill-contracts/scripts/next_id.py`:
 ```bash
 python .github/skill-contracts/scripts/next_id.py --type HANDOFF
 python .github/skill-contracts/scripts/next_id.py --type ADR
+python .github/skill-contracts/scripts/next_id.py --type REFINEMENT
 ```
+
+Um `REFINEMENT` por história. Novas rodadas de resposta atualizam o mesmo arquivo e incrementam `revision`; nunca crie cópia.
 
 Legacy `FIX` and `RFC` IDs remain supported. Never infer the next value from file count.
