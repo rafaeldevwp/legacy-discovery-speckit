@@ -163,18 +163,21 @@ python .github/skill-contracts/scripts/sync_index.py --root .github/copilot-know
 python .github/skill-contracts/scripts/validate_artifacts.py --root .github/copilot-knowledge
 ```
 
-## Handoff para o Spec Kit
+## Handoff para Git + Spec Kit
 
-Se o status for `READY_FOR_SPECKIT`, finalize com o próximo comando recomendado, mas **não o execute automaticamente**.
+Se o status for `READY_FOR_SPECKIT`, finalize recomendando **primeiro** a preparação da branch e só depois o Spec Kit. Não execute automaticamente nenhuma das duas etapas.
 
 Para `target_flow: SDD`:
 
 ```text
-/speckit.specify <pedido do usuário>. Antes de escrever a spec, leia
-.github/copilot-knowledge/handoffs/HANDOFF-NNNN-slug.md e trate Current Behavior,
-Compatibility Constraints, Impact Surface, External Boundaries e Evidence como contexto AS-IS.
-Não transforme o handoff em solução técnica.
+1. Use a skill prepare-feature-branch para esta mudança.
+2. Depois execute /speckit.specify <pedido do usuário>. Antes de escrever a spec, leia
+   .github/copilot-knowledge/handoffs/HANDOFF-NNNN-slug.md e trate Current Behavior,
+   Compatibility Constraints, Impact Surface, External Boundaries e Evidence como contexto AS-IS.
+   Não transforme o handoff em solução técnica.
 ```
+
+A branch deve seguir `feature/mmYYYY/descricao-curta` e nascer de `main` atualizada por fast-forward.
 
 Fluxo de qualidade recomendado para mudança relevante em legado:
 

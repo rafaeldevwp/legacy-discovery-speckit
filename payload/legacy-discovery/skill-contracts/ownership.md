@@ -10,6 +10,7 @@ Each artifact type has one writer. Other skills may read it or record a requeste
 | `INVESTIGATION` and the bug-demonstrating test | `investigate-legacy-bug` |
 | `IMPACT` | `analyze-change-impact` |
 | `SPECKIT_HANDOFF` | `prepare-speckit-context` |
+| Git branch `feature/mmYYYY/descricao-curta` | `prepare-feature-branch` |
 | `INDEX.md` | deterministic `sync_index.py` script |
 | Spec Kit `spec.md`, `plan.md`, `tasks.md` and managed `.specify/` artifacts | **Spec Kit**, nunca estas skills |
 

@@ -76,3 +76,8 @@ SPECKIT_HANDOFF
 5. Rode `validate_artifacts.py` para confirmar compatibilidade do histórico.
 6. Inicialize/atualize o Spec Kit separadamente.
 7. Use `prepare-speckit-context` antes da primeira mudança relevante.
+
+
+## V2.1 — Git branch gate restaurado
+
+O comportamento Git que antes vivia dentro de `execute-fix-plan` volta como skill ativa independente `prepare-feature-branch`. O workflow antigo continua arquivado. O novo gate cria `feature/mmYYYY/descricao-curta` a partir de `main` sincronizada via fast-forward antes do `/speckit.specify`.

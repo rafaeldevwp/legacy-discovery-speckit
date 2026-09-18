@@ -10,13 +10,14 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
-BUNDLE_VERSION = "1.0.0"
+BUNDLE_VERSION = "1.1.0"
 DEFAULT_SPECKIT_VERSION = "1.0.1"
 ACTIVE_SKILLS = (
     "analyze-legacy-solution",
     "investigate-legacy-bug",
     "analyze-change-impact",
     "prepare-speckit-context",
+    "prepare-feature-branch",
 )
 LEGACY_V1_SKILLS = ("coordinate-fix", "execute-fix-plan", "run-solution-regression")
 
@@ -158,7 +159,7 @@ def write_install_metadata(target: Path, version: str) -> None:
         "bundle_version": BUNDLE_VERSION,
         "spec_kit_version": version,
         "integration": "copilot",
-        "legacy_discovery_version": "2",
+        "legacy_discovery_version": "2.1",
         "installed_at_utc": datetime.now(timezone.utc).isoformat(),
         "active_skills": list(ACTIVE_SKILLS),
     }
@@ -207,6 +208,7 @@ def main() -> int:
         ".github/skills/investigate-legacy-bug",
         ".github/skills/analyze-change-impact",
         ".github/skills/prepare-speckit-context",
+        ".github/skills/prepare-feature-branch",
         ".github/skills/coordinate-fix",
         ".github/skills/execute-fix-plan",
         ".github/skills/run-solution-regression",
@@ -243,7 +245,8 @@ def main() -> int:
     say("  1) /speckit.constitution")
     say("  2) Peça: 'Use analyze-legacy-solution para iniciar o mapa deste legado.'")
     say("  3) Para uma US: 'Use prepare-speckit-context para esta mudança: ...'")
-    say("  4) Quando o HANDOFF estiver READY_FOR_SPECKIT, execute /speckit.specify")
+    say("  4) Quando o HANDOFF estiver READY_FOR_SPECKIT, use prepare-feature-branch")
+    say("  5) Depois execute /speckit.specify")
     say("\nRevise o resultado com: git status / git diff")
     say(f"Backup: {backup_root}")
     return 0

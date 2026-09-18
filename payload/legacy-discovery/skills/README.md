@@ -216,3 +216,8 @@ As skills abaixo foram movidas para `legacy-workflow/skills/`:
 - `run-solution-regression`.
 
 Elas foram preservadas, não apagadas. Veja `MIGRATION-V2.md`.
+
+
+## Git workflow V2.1
+
+A skill `prepare-feature-branch` restaura o gate Git do workflow original sem reativar `execute-fix-plan`. Ela cria `feature/mmYYYY/descricao-curta` exclusivamente a partir de `main` atualizada por `git pull --ff-only origin main`, bloqueando em worktree sujo, divergência ou branch existente.

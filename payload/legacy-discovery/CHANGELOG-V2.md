@@ -26,3 +26,13 @@
 - `run-solution-regression`.
 
 Their files remain under `legacy-workflow/` for history and rollback. V1 artifact validation remains supported.
+
+
+## 2.1 — Prepare Feature Branch
+
+- adicionada skill `prepare-feature-branch`;
+- restaurado padrão `feature/mmYYYY/descricao-curta`;
+- branch nasce de `main` após `fetch` + `pull --ff-only`;
+- worktree sujo, divergência e branch existente bloqueiam;
+- proibidos stash/reset/merge/rebase/force/push automáticos;
+- `prepare-speckit-context` agora recomenda branch antes de `/speckit.specify`.

@@ -101,7 +101,7 @@ Automaticamente:
 2. instala specify-cli 1.0.1 oficial
 3. executa Spec Kit no repositório existente
 4. configura integração GitHub Copilot
-5. instala suas 4 Legacy Discovery Skills
+5. instala suas 5 Skills ativas (4 de Discovery + 1 de Git)
 6. instala os contratos e scripts do Knowledge Store
 7. cria .github/copilot-knowledge
 8. arquiva skills antigas da V1, sem apagá-las
@@ -128,7 +128,8 @@ SEU-LEGADO/
 │   │   ├── analyze-legacy-solution/
 │   │   ├── investigate-legacy-bug/
 │   │   ├── analyze-change-impact/
-│   │   └── prepare-speckit-context/
+│   │   ├── prepare-speckit-context/
+│   │   └── prepare-feature-branch/
 │   ├── skill-contracts/
 │   ├── copilot-knowledge/
 │   │   ├── INDEX.md
@@ -242,7 +243,25 @@ Quando retornar:
 READY_FOR_SPECKIT
 ```
 
-siga com:
+primeiro crie a branch de trabalho:
+
+```text
+Use a skill prepare-feature-branch para esta mudança.
+```
+
+Ela atualiza `main` somente por fast-forward e cria:
+
+```text
+feature/mmYYYY/descricao-curta
+```
+
+Exemplo:
+
+```text
+feature/082026/tratar-timeout-pbh
+```
+
+Depois siga com:
 
 ```text
 /speckit.specify
@@ -256,6 +275,24 @@ siga com:
 
 ---
 
+# Branch Git antes do Spec Kit
+
+Para mudanças que serão implementadas, o fluxo padrão inclui uma branch dedicada:
+
+```text
+HANDOFF READY
+    ↓
+prepare-feature-branch
+    ↓
+main atualizada com --ff-only
+    ↓
+feature/mmYYYY/descricao-curta
+    ↓
+/speckit.specify
+```
+
+A Skill nunca executa `stash`, `reset`, `merge`, `rebase`, `force` ou `push` automaticamente. Se o worktree estiver sujo, `main` estiver divergente ou a branch já existir, ela bloqueia e pede decisão humana.
+
 # Quando usar cada Skill?
 
 | Quero... | Use |
@@ -264,6 +301,7 @@ siga com:
 | investigar bug complexo | `investigate-legacy-bug` |
 | saber o raio de impacto | `analyze-change-impact` |
 | preparar uma US para o Spec Kit | `prepare-speckit-context` |
+| criar a branch segura da mudança | `prepare-feature-branch` |
 | especificar o TO-BE | `/speckit.specify` |
 | definir arquitetura futura | `/speckit.plan` |
 | decompor implementação | `/speckit.tasks` |
@@ -283,6 +321,8 @@ QUERO MUDAR
 prepare-speckit-context
       ↓
 HANDOFF
+      ↓
+prepare-feature-branch
       ↓
 Spec Kit
 ```
@@ -343,8 +383,8 @@ python install.py --target /caminho/repo --keep-legacy-v1
 # Versões deste pacote
 
 ```text
-Bundle:              1.0.0
-Legacy Discovery:    V2
+Bundle:              1.1.0
+Legacy Discovery:    V2.1
 Spec Kit / CLI:      1.0.1
 Integração padrão:   GitHub Copilot
 Python mínimo:       3.11
