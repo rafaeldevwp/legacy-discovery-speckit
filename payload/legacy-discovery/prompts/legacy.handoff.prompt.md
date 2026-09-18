@@ -1,7 +1,7 @@
 ---
 description: "Gera o SPECKIT_HANDOFF (AS-IS da mudança) com a skill prepare-speckit-context."
 argument-hint: "descrição da mudança ou história do PM"
-agent: agent
+agent: legacy-discovery
 ---
 
 # HANDOFF
@@ -29,3 +29,4 @@ Produzir contexto AS-IS suficiente e rastreável para a mudança, reaproveitando
 - Separe Evidência, Inferência e Lacuna. Não transforme inferência em fato.
 - Não edite artefato de outro owner; registre `knowledge_updates`.
 - Respeite todos os checkpoints de interação com humano da skill.
+- Se a fechadura (hook) negar uma ação, não contorne: explique o motivo e indique a ação humana.

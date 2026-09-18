@@ -1,7 +1,7 @@
 ---
 description: "Mostra o estado de cada história (handoff, refinamento, perguntas abertas) e o próximo comando."
 argument-hint: "(opcional) HANDOFF-NNNN ou REFINEMENT-NNNN"
-agent: agent
+agent: legacy-discovery
 ---
 
 # STATUS
@@ -26,3 +26,4 @@ Dar visão rápida e determinística do andamento das histórias.
 - Separe Evidência, Inferência e Lacuna. Não transforme inferência em fato.
 - Não edite artefato de outro owner; registre `knowledge_updates`.
 - Respeite todos os checkpoints de interação com humano da skill.
+- Se a fechadura (hook) negar uma ação, não contorne: explique o motivo e indique a ação humana.

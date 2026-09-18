@@ -97,7 +97,7 @@ Principal saída:
 
 - `refinements/REFINEMENT-{NNNN}-{slug}.md` (`artifact_type: STORY_REFINEMENT`).
 
-Só fica `READY_FOR_SPECKIT` com handoff pronto, sem pergunta bloqueante aberta e com revisão humana registrada. Não escreve spec/plan/tasks, não decide arquitetura, não implementa.
+Grava no máximo `READY_FOR_REVIEW`. Só vira `READY_FOR_SPECKIT` quando o humano roda `approve_refinement.py`, que sela o conteúdo. Na V2.4 os comandos rodam no agente `legacy-discovery`, cuja fechadura (hook) impede o agente de aprovar, de escrever fora das trilhas e de alterar as próprias regras. Não escreve spec/plan/tasks, não decide arquitetura, não implementa.
 
 ### `prepare-feature-branch`
 

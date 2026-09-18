@@ -24,6 +24,8 @@ def next_for_refinement(meta: dict[str, str], handoff_status: str | None) -> str
         if meta.get("block_reason") == "HANDOFF_MISSING" or handoff_status is None:
             return "/legacy.handoff"
         return f"resolver {meta.get('block_reason', 'block_reason')} e depois /legacy.refine"
+    if status == "READY_FOR_REVIEW":
+        return f"/legacy.approve {meta.get('id', '')} (você roda approve_refinement.py)"
     if status == "READY_FOR_SPECKIT":
         if handoff_status != "READY_FOR_SPECKIT":
             return "/legacy.validate (handoff não está pronto)"

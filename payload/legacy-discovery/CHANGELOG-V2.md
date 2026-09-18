@@ -63,3 +63,11 @@ Their files remain under `legacy-workflow/` for history and rollback. V1 artifac
 - instalador grava apenas `legacy.*.prompt.md` e registra os comandos em `installation.json`; outros prompts não são tocados;
 - **sem regressão**: as 5 skills anteriores e o workflow V1 não foram alterados; sem refinamentos, os scripts produzem saída idêntica à V2.2 — provado pela suíte `tests/` do pacote;
 - `SHA256SUMS.txt` regenerado (o da V2.2 estava desatualizado em 27 arquivos); pastas `backups/` e `__pycache__/` removidas do pacote distribuído.
+
+## 2.4 — Fechadura, lacre, fiscal e termômetro (bundle 1.4.0)
+
+- **fechadura**: agente `legacy-discovery` com hook `PreToolUse` (`legacy_governance.py`, protocolo do AgentQA, falha fechada). Nega escrita fora das trilhas das skills, escrita em Spec Kit/skills/contratos/hook/agente/comandos/INDEX, gravação de aprovação pelo agente, `approve_refinement.py`, `archive-and-clean`, Git destrutivo/publicação, escrita por terminal em trilhas protegidas e execução codificada. Leitura, busca, build, testes e scripts de contrato seguem livres;
+- **lacre**: novo status `READY_FOR_REVIEW`; aprovação só por `approve_refinement.py`, executado pelo humano, que grava `reviewed_by`, `reviewed_at` e `approval_digest` (SHA-256). Edição posterior invalida a aprovação. Corrige lacuna da V2.3: refinamento sem perguntas e ainda não aprovado não tinha status válido;
+- **fiscal**: `validate_artifacts.py` confere `arquivo:linha`, `EXISTING_TEST:arquivo::Teste` e IDs de artefatos citados (erro em refinamentos, `WARNING` em handoffs);
+- **termômetro**: `tools/build_release.py` (higiene, checksums, zip em ordem fixa e `--verify-zip`) e workflow de CI (Windows/Linux, Python 3.11/3.13);
+- **sem regressão**: as 5 skills da V2.2 e o workflow V1 seguem byte a byte; sem refinamentos, os scripts dão saída idêntica à V2.2; refinamentos aprovados na V2.3 continuam válidos (com aviso). 106 testes.

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""STORY_REFINEMENT contract checks, used by validate_artifacts.py."""
+"""STORY_REFINEMENT contract checks and evidence checks, used by validate_artifacts.py and approve_refinement.py."""
 
 from __future__ import annotations
 
+import hashlib
 import re
 from datetime import datetime
+from pathlib import Path
 
 from artifact_lib import Artifact
 
@@ -18,13 +20,31 @@ REQUIRED_SECTIONS = (
 AMB_SOURCES = {"STORY", "KNOWLEDGE", "CODE", "HUMAN"}
 AMB_STATUSES = {"RESOLVED_BY_EVIDENCE", "OPEN_HUMAN", "ANSWERED_BY_HUMAN", "ASSUMPTION_ACCEPTED"}
 HUMAN_STATUSES = {"OPEN_HUMAN", "ANSWERED_BY_HUMAN", "ASSUMPTION_ACCEPTED"}
+READY_STATUSES = {"READY_FOR_REVIEW", "READY_FOR_SPECKIT"}
 EMPTY = {"", "-", "null", "none", "n/a"}
 NO_GUARDRAIL_MARKER = "NO_EXISTING_BEHAVIOR_AFFECTED"
+
+# Fields that approval itself changes; everything else is sealed by approval_digest.
+APPROVAL_FIELDS = {"status", "reviewed_by", "reviewed_at", "approval_digest", "revision", "updated_at", "block_reason"}
+
+# `path/File.ext:42` or `path/File.ext:42-50` inside backticks.
+CODE_CITATION = re.compile(r"`([A-Za-z0-9_.\-/\\]+\.[A-Za-z0-9]+):(\d+)(?:-(\d+))?`")
+# EXISTING_TEST:path/File.ext::TestName
+EXISTING_TEST = re.compile(r"EXISTING_TEST:([A-Za-z0-9_.\-/\\]+\.[A-Za-z0-9]+)(?:::([A-Za-z0-9_]+))?")
+ARTIFACT_REFERENCE = re.compile(
+    r"\b(HANDOFF-\d{4}|REFINEMENT-\d{4}|ADR-\d{4}|RFC-\d{4}"
+    r"|IMPACT-\d{8}-[a-z0-9]+(?:-[a-z0-9]+)*|INVESTIGATION-\d{8}-[a-z0-9]+(?:-[a-z0-9]+)*"
+    r"|PROJECT-[a-z0-9]+(?:-[a-z0-9]+)*|DEEP-DIVE-[a-z0-9]+(?:-[a-z0-9]+)+)\b"
+)
 
 
 def _section(body: str, heading: str) -> str:
     match = re.search(rf"^{re.escape(heading)}[ \t]*$(.*?)(?=^## |\Z)", body, re.M | re.S)
     return match.group(1) if match else ""
+
+
+def _without_section(body: str, heading: str) -> str:
+    return re.sub(rf"^{re.escape(heading)}[ \t]*$.*?(?=^## |\Z)", "", body, flags=re.M | re.S)
 
 
 def _rows(text: str, id_pattern: str) -> list[list[str]]:
@@ -55,7 +75,72 @@ def _iso(value: str) -> bool:
         return False
 
 
-def check_refinement(artifact: Artifact, handoffs: dict[str, Artifact]) -> list[str]:
+def repo_root_for(knowledge_root: Path) -> Path | None:
+    """The repository root when the knowledge base sits at <repo>/.github/copilot-knowledge; otherwise None."""
+    resolved = knowledge_root.resolve()
+    if resolved.parent.name == ".github":
+        return resolved.parent.parent
+    return None
+
+
+def approval_digest(text: str) -> str:
+    """SHA-256 of the refinement without the fields that approval itself changes."""
+    lines = text.replace("\r\n", "\n").split("\n")
+    kept: list[str] = []
+    in_front = bool(lines) and lines[0].strip() == "---"
+    for index, line in enumerate(lines):
+        if in_front and index > 0 and line.strip() == "---":
+            in_front = False
+        elif in_front and index > 0 and ":" in line and not line[0].isspace():
+            if line.split(":", 1)[0].strip() in APPROVAL_FIELDS:
+                continue
+        kept.append(line.rstrip())
+    return hashlib.sha256("\n".join(kept).strip().encode("utf-8")).hexdigest()
+
+
+def _resolve_in_repo(repo_root: Path, relative: str) -> Path | None:
+    candidate = (repo_root / relative.replace("\\", "/")).resolve()
+    try:
+        candidate.relative_to(repo_root.resolve())
+    except ValueError:
+        return None
+    return candidate
+
+
+def check_evidence(path: Path, body: str, repo_root: Path | None, known_ids: set[str] | None) -> list[str]:
+    """Verify that cited files, lines, tests and artifacts actually exist."""
+    problems: list[str] = []
+    if known_ids is not None:
+        for reference in sorted(set(ARTIFACT_REFERENCE.findall(body))):
+            if reference not in known_ids:
+                problems.append(f"{path}: cites {reference}, which does not exist in the knowledge base")
+    if repo_root is None:
+        return problems
+    for relative, start, end in sorted(set(CODE_CITATION.findall(body))):
+        target = _resolve_in_repo(repo_root, relative)
+        if target is None or not target.is_file():
+            problems.append(f"{path}: cites `{relative}:{start}`, but {relative} does not exist in the repository")
+            continue
+        last = int(end or start)
+        total = len(target.read_text(encoding="utf-8", errors="replace").splitlines())
+        if int(start) < 1 or last > total:
+            problems.append(f"{path}: cites `{relative}:{start}{'-' + end if end else ''}`, but {relative} has only {total} line(s)")
+    for relative, test_name in sorted(set(EXISTING_TEST.findall(body))):
+        target = _resolve_in_repo(repo_root, relative)
+        if target is None or not target.is_file():
+            problems.append(f"{path}: EXISTING_TEST {relative} does not exist in the repository")
+        elif test_name and not re.search(rf"\b{re.escape(test_name)}\b", target.read_text(encoding="utf-8", errors="replace")):
+            problems.append(f"{path}: EXISTING_TEST {relative} does not contain {test_name}")
+    return problems
+
+
+def check_refinement(
+    artifact: Artifact,
+    handoffs: dict[str, Artifact],
+    known_ids: set[str] | None = None,
+    repo_root: Path | None = None,
+    warnings: list[str] | None = None,
+) -> list[str]:
     path, meta, body = artifact.path, artifact.metadata, artifact.body
     errors: list[str] = []
     status = meta.get("status", "")
@@ -80,6 +165,9 @@ def check_refinement(artifact: Artifact, handoffs: dict[str, Artifact]) -> list[
             handoff = handoffs.get(handoff_ref)
             if handoff is None:
                 errors.append(f"{path}: STORY_REFINEMENT handoff {handoff_ref} not found in knowledge base")
+
+    # Evidence: the story itself is quoted verbatim and may mention anything.
+    errors.extend(check_evidence(path, _without_section(body, "## Story (verbatim)"), repo_root, known_ids))
 
     # Ambiguity register
     ambiguities = _rows(_section(body, "## Ambiguity Register"), r"AMB-\d{2,}")
@@ -118,31 +206,29 @@ def check_refinement(artifact: Artifact, handoffs: dict[str, Artifact]) -> list[
     if meta.get("open_questions", "") != str(open_count):
         errors.append(f"{path}: open_questions is {meta.get('open_questions')} but register has {open_count} OPEN_HUMAN")
     if status == "AWAITING_HUMAN" and open_count == 0:
-        errors.append(f"{path}: AWAITING_HUMAN requires at least one OPEN_HUMAN ambiguity")
+        errors.append(f"{path}: AWAITING_HUMAN requires at least one OPEN_HUMAN ambiguity (use READY_FOR_REVIEW when none is left)")
     if status == "BLOCKED" and _is_empty(meta.get("block_reason")):
         errors.append(f"{path}: BLOCKED refinement lacks block_reason")
+    if status != "READY_FOR_SPECKIT" and (not _is_empty(meta.get("reviewed_by")) or not _is_empty(meta.get("approval_digest"))):
+        errors.append(f"{path}: {status} must not carry reviewed_by/approval_digest; only approve_refinement.py records approval")
 
-    if status != "READY_FOR_SPECKIT":
+    if status not in READY_STATUSES:
         return errors
 
-    # Readiness gate
+    # Readiness gate (shared by READY_FOR_REVIEW and READY_FOR_SPECKIT)
     if handoff is None:
-        errors.append(f"{path}: READY_FOR_SPECKIT requires an existing handoff")
+        errors.append(f"{path}: {status} requires an existing handoff")
     elif handoff.metadata.get("status") != "READY_FOR_SPECKIT":
-        errors.append(f"{path}: READY_FOR_SPECKIT requires {handoff_ref} to be READY_FOR_SPECKIT (is {handoff.metadata.get('status')})")
+        errors.append(f"{path}: {status} requires {handoff_ref} to be READY_FOR_SPECKIT (is {handoff.metadata.get('status')})")
     if open_blocking:
-        errors.append(f"{path}: READY_FOR_SPECKIT with blocking open questions: {', '.join(open_blocking)}")
-    if _is_empty(meta.get("reviewed_by")) or _is_empty(meta.get("reviewed_at")):
-        errors.append(f"{path}: READY_FOR_SPECKIT requires human reviewed_by and reviewed_at")
-    elif not _iso(meta["reviewed_at"]):
-        errors.append(f"{path}: reviewed_at is not ISO-8601")
+        errors.append(f"{path}: {status} with blocking open questions: {', '.join(open_blocking)}")
     if not _is_empty(meta.get("block_reason")):
-        errors.append(f"{path}: READY_FOR_SPECKIT must not carry block_reason")
+        errors.append(f"{path}: {status} must not carry block_reason")
 
     criteria = _rows(_section(body, "## Acceptance Criteria"), r"AC-\d{2,}")
     ac_ids = {cells[0] for cells in criteria}
     if not criteria:
-        errors.append(f"{path}: READY_FOR_SPECKIT requires at least one AC-NN")
+        errors.append(f"{path}: {status} requires at least one AC-NN")
     for cells in criteria:
         origin = cells[-1] if len(cells) >= 3 else ""
         human = re.fullmatch(r"HUMAN:(AMB-\d{2,})", origin)
@@ -156,7 +242,7 @@ def check_refinement(artifact: Artifact, handoffs: dict[str, Artifact]) -> list[
     guardrails = _rows(guardrail_text, r"GR-\d{2,}")
     gr_ids = {cells[0] for cells in guardrails}
     if not guardrails and NO_GUARDRAIL_MARKER not in guardrail_text:
-        errors.append(f"{path}: READY_FOR_SPECKIT requires GR-NN rows or {NO_GUARDRAIL_MARKER} with justification")
+        errors.append(f"{path}: {status} requires GR-NN rows or {NO_GUARDRAIL_MARKER} with justification")
     for cells in guardrails:
         proof = cells[-1] if len(cells) >= 4 else ""
         if not (proof == "CHARACTERIZATION_TEST_REQUIRED" or re.fullmatch(r"(EXISTING_TEST|MANUAL_CHECK):\S.*", proof)):
@@ -165,7 +251,7 @@ def check_refinement(artifact: Artifact, handoffs: dict[str, Artifact]) -> list[
     slices = _rows(_section(body, "## Execution Plan"), r"SLICE-\d{2,}")
     slice_ids = {cells[0] for cells in slices}
     if not slices:
-        errors.append(f"{path}: READY_FOR_SPECKIT requires at least one SLICE-NN")
+        errors.append(f"{path}: {status} requires at least one SLICE-NN")
     covered_ac: set[str] = set()
     covered_gr: set[str] = set()
     for cells in slices:
@@ -206,5 +292,22 @@ def check_refinement(artifact: Artifact, handoffs: dict[str, Artifact]) -> list[
         errors.append(f"{path}: {missing} is not covered by any SLICE")
     for missing in sorted(gr_ids - covered_gr):
         errors.append(f"{path}: {missing} is not covered by any SLICE")
+
+    if status != "READY_FOR_SPECKIT":
+        return errors
+
+    # Human approval and seal
+    if _is_empty(meta.get("reviewed_by")) or _is_empty(meta.get("reviewed_at")):
+        errors.append(f"{path}: READY_FOR_SPECKIT requires human reviewed_by and reviewed_at")
+    elif not _iso(meta["reviewed_at"]):
+        errors.append(f"{path}: reviewed_at is not ISO-8601")
+    recorded = meta.get("approval_digest", "")
+    if _is_empty(recorded):
+        if warnings is not None:
+            warnings.append(f"{path}: approved without approval_digest (v5 approval); re-approve with approve_refinement.py to seal it")
+    else:
+        current = approval_digest(path.read_text(encoding="utf-8-sig"))
+        if recorded != current:
+            errors.append(f"{path}: refinement changed after approval (approval_digest mismatch); set READY_FOR_REVIEW and approve again")
 
     return errors

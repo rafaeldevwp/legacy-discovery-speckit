@@ -1,7 +1,7 @@
 ---
 description: "Mapeia o raio de impacto de uma mudança com a skill analyze-change-impact."
 argument-hint: "classe, método, endpoint ou contrato alvo"
-agent: agent
+agent: legacy-discovery
 ---
 
 # ANALISAR IMPACTO
@@ -29,3 +29,4 @@ Mostrar quem depende do alvo antes de alterá-lo.
 - Separe Evidência, Inferência e Lacuna. Não transforme inferência em fato.
 - Não edite artefato de outro owner; registre `knowledge_updates`.
 - Respeite todos os checkpoints de interação com humano da skill.
+- Se a fechadura (hook) negar uma ação, não contorne: explique o motivo e indique a ação humana.

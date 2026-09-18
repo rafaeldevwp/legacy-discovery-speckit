@@ -30,7 +30,7 @@ python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mod
 python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive-and-clean
 ```
 
-## Atualização V2.3 (bundle 1.3.0)
+## Atualização V2.3 (bundle 1.3.0) — incluída na V2.4
 
 - Nova skill `.github/skills/refine-user-story/` (PO técnico que refina a história do PM).
 - Novo diretório local-only `.github/copilot-knowledge/refinements/`.
@@ -38,3 +38,12 @@ python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mod
 - Novo script somente-leitura `.github/skill-contracts/scripts/story_status.py`.
 - Comandos `/legacy.*`: copie `prompts/legacy.*.prompt.md` → `.github/prompts/` (o instalador faz isso). Não copie o `README.md` de `prompts/`.
 - Nenhuma skill anterior foi alterada. Atualizar a partir da V2.2 preserva `.github/copilot-knowledge/`.
+
+## Atualização V2.4 (bundle 1.4.0)
+
+- Novo agente `.github/agents/legacy-discovery.agent.md` com o hook `.github/hooks/legacy_governance.py` (a fechadura).
+  O instalador só grava esses dois arquivos; hooks e agentes de outros pacotes (ex.: AgentQA) não são tocados.
+- Os comandos `/legacy.*` passam a rodar nesse agente.
+- Novo script humano `.github/skill-contracts/scripts/approve_refinement.py`; novo status `READY_FOR_REVIEW`.
+- `validate_artifacts.py` confere evidência quando a base está em `<repo>/.github/copilot-knowledge`.
+- Refinamentos aprovados na V2.3 continuam válidos, com `WARNING` pedindo reaprovação para selar.

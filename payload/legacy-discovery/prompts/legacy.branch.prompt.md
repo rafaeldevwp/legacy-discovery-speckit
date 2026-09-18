@@ -1,7 +1,7 @@
 ---
 description: "Cria a branch feature/mmYYYY/descricao-curta a partir da main atualizada (prepare-feature-branch)."
 argument-hint: "descrição curta da mudança (e opcionalmente REFINEMENT-NNNN)"
-agent: agent
+agent: legacy-discovery
 ---
 
 # CRIAR BRANCH
@@ -29,3 +29,4 @@ Criar a branch de trabalho com baseline Git seguro antes do /speckit.specify.
 - Separe Evidência, Inferência e Lacuna. Não transforme inferência em fato.
 - Não edite artefato de outro owner; registre `knowledge_updates`.
 - Respeite todos os checkpoints de interação com humano da skill.
+- Se a fechadura (hook) negar uma ação, não contorne: explique o motivo e indique a ação humana.

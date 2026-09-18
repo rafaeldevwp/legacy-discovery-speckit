@@ -1,7 +1,7 @@
 ---
 description: "Arquiva os artefatos locais das skills num ZIP fora do repositório (e opcionalmente limpa)."
 argument-hint: "(opcional) limpar"
-agent: agent
+agent: legacy-discovery
 ---
 
 # ARQUIVAR
@@ -26,3 +26,4 @@ Reduzir poluição local sem tocar código nem artefatos do Spec Kit.
 - Separe Evidência, Inferência e Lacuna. Não transforme inferência em fato.
 - Não edite artefato de outro owner; registre `knowledge_updates`.
 - Respeite todos os checkpoints de interação com humano da skill.
+- Se a fechadura (hook) negar uma ação, não contorne: explique o motivo e indique a ação humana.

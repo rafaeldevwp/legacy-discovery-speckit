@@ -9,8 +9,8 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
-BUNDLE_VERSION = "1.3.0"
-LEGACY_DISCOVERY_VERSION = "2.3"
+BUNDLE_VERSION = "1.4.0"
+LEGACY_DISCOVERY_VERSION = "2.4"
 DEFAULT_SPECKIT_VERSION = "1.0.1"
 ACTIVE_SKILLS = (
     "analyze-legacy-solution",
@@ -22,6 +22,10 @@ ACTIVE_SKILLS = (
 )
 LEGACY_V1_SKILLS = ("coordinate-fix", "execute-fix-plan", "run-solution-regression")
 COMMAND_PREFIX = "legacy."
+GOVERNANCE_FILES = (
+    ("hooks/legacy_governance.py", ".github/hooks/legacy_governance.py"),
+    ("agents/legacy-discovery.agent.md", ".github/agents/legacy-discovery.agent.md"),
+)
 
 
 def say(msg: str = "") -> None:
@@ -148,6 +152,16 @@ def install_commands(bundle_root: Path, target: Path) -> list[str]:
     return installed
 
 
+def install_governance(bundle_root: Path, target: Path) -> None:
+    """Copy only the legacy-discovery hook and agent; other hooks/agents (e.g. AgentQA) are never touched."""
+    payload = bundle_root / "payload" / "legacy-discovery"
+    for source, destination in GOVERNANCE_FILES:
+        dst = target / destination
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(payload / source, dst)
+    say("Fechadura instalada: agente legacy-discovery + hook .github/hooks/legacy_governance.py")
+
+
 def install_discovery(bundle_root: Path, target: Path, keep_legacy_v1: bool) -> None:
     say("\n[3/4] Instalando Legacy Discovery V" + LEGACY_DISCOVERY_VERSION + "...")
     payload = bundle_root / "payload" / "legacy-discovery"
@@ -170,6 +184,7 @@ def install_discovery(bundle_root: Path, target: Path, keep_legacy_v1: bool) -> 
 
     archive_legacy_v1(target, keep_legacy_v1)
     install_commands(bundle_root, target)
+    install_governance(bundle_root, target)
 
     docs = target / ".github" / "legacy-discovery"
     docs.mkdir(parents=True, exist_ok=True)
@@ -257,6 +272,8 @@ def main() -> int:
         ".github/skills/prepare-speckit-context",
         ".github/skills/prepare-feature-branch",
         ".github/skills/refine-user-story",
+        ".github/hooks/legacy_governance.py",
+        ".github/agents/legacy-discovery.agent.md",
         ".github/skills/coordinate-fix",
         ".github/skills/execute-fix-plan",
         ".github/skills/run-solution-regression",
@@ -289,6 +306,9 @@ def main() -> int:
     missing_commands = [n for n in bundle_commands(bundle_root) if not (target / ".github" / "prompts" / n).exists()]
     if missing_commands:
         raise RuntimeError("Comandos ausentes após instalação: " + ", ".join(missing_commands))
+    missing_governance = [dst for _, dst in GOVERNANCE_FILES if not (target / dst).exists()]
+    if missing_governance:
+        raise RuntimeError("Fechadura ausente após instalação: " + ", ".join(missing_governance))
 
     say("\nINSTALAÇÃO CONCLUÍDA.")
     say("\nAgora abra a raiz do repositório no VS Code e use o Copilot em Agent Mode.")
@@ -297,7 +317,7 @@ def main() -> int:
     say("  1) /speckit.constitution")
     say("  2) Peça: 'Use analyze-legacy-solution para iniciar o mapa deste legado.'")
     say("  3) Para uma US do PM: /legacy.story <história literal>")
-    say("     Responda com /legacy.answer e aprove com /legacy.approve (só você aprova)")
+    say("     Responda com /legacy.answer; /legacy.approve mostra o comando de aprovação que só você roda")
     say("  4) Acompanhe com /legacy.status")
     say("  5) Com o REFINEMENT em READY_FOR_SPECKIT: /legacy.branch <descrição>")
     say("  6) Depois execute /speckit.specify")

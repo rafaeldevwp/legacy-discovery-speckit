@@ -58,7 +58,7 @@ Valid `FIX_REGRESSION` results: `PASSED`, `FAILED`, `UNSTABLE`, `BLOCKED`.
 | `INVESTIGATION` | `STATIC_HYPOTHESIS`, `CONFIRMED`, `REFUTED`, `BLOCKED` |
 | `IMPACT_ANALYSIS` | `COMPLETE`, `PARTIAL`, `BLOCKED` |
 | `SPECKIT_HANDOFF` | `READY_FOR_SPECKIT`, `PARTIAL`, `BLOCKED` |
-| `STORY_REFINEMENT` | `READY_FOR_SPECKIT`, `AWAITING_HUMAN`, `BLOCKED` |
+| `STORY_REFINEMENT` | `READY_FOR_SPECKIT`, `READY_FOR_REVIEW`, `AWAITING_HUMAN`, `BLOCKED` |
 
 Use somente essas constantes no frontmatter. Texto de apresentação pode traduzi-las, mas não substituí-las.
 
@@ -76,17 +76,21 @@ O handoff não possui estados de implementação. O lifecycle TO-BE pertence ao 
 ## Story refinement
 
 ```text
-(intake) → AWAITING_HUMAN ⇄ (respostas do humano, revision+1) → READY_FOR_SPECKIT
-         ↘ BLOCKED (pré-condição ausente: handoff, conhecimento stale, conflito)
+(intake) → AWAITING_HUMAN ⇄ (respostas do humano, revision+1) → READY_FOR_REVIEW
+         ↘ BLOCKED (pré-condição ausente)                          │  approve_refinement.py (humano)
+                                                                   ▼
+                                     READY_FOR_SPECKIT + approval_digest (lacre)
+                                     qualquer edição → lacre quebra → READY_FOR_REVIEW
 ```
 
 `STORY_REFINEMENT` status semantics:
 
 - `AWAITING_HUMAN` — existe ao menos uma ambiguidade `OPEN_HUMAN`; nada avança até a resposta;
-- `READY_FOR_SPECKIT` — handoff relacionado `READY_FOR_SPECKIT`, nenhuma `OPEN_HUMAN` bloqueante, AC/GR/SLICE rastreáveis e revisão humana registrada (`reviewed_by`, `reviewed_at`);
+- `READY_FOR_REVIEW` — handoff relacionado `READY_FOR_SPECKIT`, nenhuma `OPEN_HUMAN` bloqueante, AC/GR/SLICE rastreáveis; aguarda aprovação humana;
+- `READY_FOR_SPECKIT` — o mesmo, com `reviewed_by`, `reviewed_at` e `approval_digest` gravados por `approve_refinement.py`;
 - `BLOCKED` — pré-condição que resposta a pergunta não resolve; exige `block_reason`.
 
-Somente o humano pode fazer um refinamento chegar a `READY_FOR_SPECKIT`: a skill grava `reviewed_by` apenas após confirmação explícita na conversa. O refinamento não possui estados de implementação.
+Somente o humano pode fazer um refinamento chegar a `READY_FOR_SPECKIT`: executando `approve_refinement.py` no próprio terminal. O hook do agente `legacy-discovery` nega esse script ao agente. O `approval_digest` sela o conteúdo: se o refinamento mudar depois, o validador recusa a aprovação. O refinamento não possui estados de implementação.
 
 ## Common frontmatter
 

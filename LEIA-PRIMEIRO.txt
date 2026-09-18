@@ -7,8 +7,10 @@ WINDOWS:
 4. Ao terminar, abra o repositório no VS Code + Copilot Agent Mode.
 5. Leia README.md para o primeiro uso.
 
-O instalador usa Spec Kit oficial 1.0.1 + Legacy Discovery V2.3.
-Novo na V2.3: skill refine-user-story (PO técnico que refina a história do PM).
+O instalador usa Spec Kit oficial 1.0.1 + Legacy Discovery V2.4.
+V2.3: skill refine-user-story (PO técnico) e comandos /legacy.*.
+V2.4: fechadura (hook no agente legacy-discovery), aprovação só humana com lacre,
+      validador que confere evidência e release/CI reprodutíveis.
 A primeira instalação requer internet.
 
 Politica V4:

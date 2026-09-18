@@ -1,7 +1,7 @@
 ---
 description: "Fluxo guiado de uma história do PM: handoff → refinamento, parando em cada decisão humana."
 argument-hint: "história do PM (literal)"
-agent: agent
+agent: legacy-discovery
 ---
 
 # HISTÓRIA — FLUXO GUIADO
@@ -20,7 +20,7 @@ Levar uma história do PM até o refinamento pronto, encadeando as skills na ord
 3. Com handoff pronto: siga [`refine-user-story`](../skills/refine-user-story/SKILL.md).
    - `AWAITING_HUMAN`: mostre as perguntas completas e pare. Oriente `/legacy.answer`.
    - `BLOCKED`: mostre o motivo e o menor passo para destravar; pare.
-   - Sem pergunta bloqueante: mostre o resumo e oriente `/legacy.approve`; pare.
+   - `READY_FOR_REVIEW`: mostre o resumo e oriente `/legacy.approve`; pare.
 4. Rode validar → indexar → validar a cada artefato gravado.
 
 ## Saída Obrigatória
@@ -28,10 +28,11 @@ Levar uma história do PM até o refinamento pronto, encadeando as skills na ord
 
 ## Regras
 - Não crie branch nem chame o Spec Kit: o fluxo termina no refinamento.
-- Não aprove o refinamento: isso é `/legacy.approve`, digitado pelo humano.
+- Não aprove o refinamento: a aprovação é `approve_refinement.py`, executado pelo humano.
 - Cada skill mantém seus próprios checkpoints de confirmação.
 - Artefatos de skill são local-only: não faça stage, commit ou push de `.github/copilot-knowledge/`.
 - Nunca escreva em `.specify/` ou `specs/`; isso pertence ao Spec Kit.
 - Separe Evidência, Inferência e Lacuna. Não transforme inferência em fato.
 - Não edite artefato de outro owner; registre `knowledge_updates`.
 - Respeite todos os checkpoints de interação com humano da skill.
+- Se a fechadura (hook) negar uma ação, não contorne: explique o motivo e indique a ação humana.

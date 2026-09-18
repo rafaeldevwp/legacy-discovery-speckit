@@ -5,7 +5,7 @@ Este ZIP existe para você **não precisar instalar e juntar duas coisas manualm
 Ele combina:
 
 1. **GitHub Spec Kit oficial** — fixado em `specify-cli 1.0.1`;
-2. **Legacy Discovery V2.3** — suas Skills para entender o AS-IS de sistemas legados grandes e refinar histórias antes do Spec Kit;
+2. **Legacy Discovery V2.4** — suas Skills para entender o AS-IS de sistemas legados grandes e refinar histórias antes do Spec Kit, com fechadura de governança;
 3. **instalador único** — inicializa o Spec Kit e instala as Skills no mesmo repositório;
 4. **Persistent Knowledge + HANDOFF** — a ponte entre Discovery e Spec Kit.
 
@@ -208,6 +208,65 @@ Não peça para estudar milhares de arquivos profundamente de uma vez.
 
 ---
 
+# Fechadura, lacre e fiscal (v6)
+
+A v5 tinha regras ótimas, mas algumas funcionavam **na confiança**. A v6 troca confiança por mecanismo.
+
+## 🔒 Fechadura — agente `legacy-discovery` com hook
+
+Os comandos `/legacy.*` rodam no agente `.github/agents/legacy-discovery.agent.md`, que carrega o hook
+`.github/hooks/legacy_governance.py` (mesmo protocolo do AgentQA: `PreToolUse`, `allow`/`deny`, falha fechada).
+Antes de **cada** ferramenta, o hook nega:
+
+| Negado | Por quê |
+|---|---|
+| escrever fora de `.github/copilot-knowledge/` e de projetos de teste | skills não implementam |
+| escrever em `.specify/`, `specs/` | território do Spec Kit |
+| editar skills, contratos, validador, o próprio hook, o agente, os comandos, o `INDEX.md` | o agente não pode afrouxar as regras para passar |
+| gravar `READY_FOR_SPECKIT` em refinamento, `reviewed_by`, `approval_digest` | aprovação é ato humano |
+| rodar `approve_refinement.py` ou `archive-and-clean` | idem |
+| `git push/commit/add/reset/stash/rebase/merge/switch/checkout...` | skills não publicam nem reescrevem histórico |
+| escrever/apagar via terminal em trilhas protegidas; `-EncodedCommand` | tudo tem que ser inspecionável |
+
+Continua **livre**: ler, buscar, compilar, testar, rodar os scripts de contrato, `git status/log/diff/fetch`,
+criar a branch pelo script oficial. Negações ficam em `.github/copilot-knowledge/governance-log/`.
+
+> Regra de desenho herdada do AgentQA: *um hook que bloqueia trabalho legítimo acaba sendo desligado*.
+> A fechadura nega só violações claras. Ela é uma fechadura, não um cofre: impede o erro e o atalho, não um ataque deliberado.
+
+## 🔏 Lacre — aprovação só humana
+
+Novo status `READY_FOR_REVIEW`: refinamento sem pergunta bloqueante, aguardando você. A aprovação é um script
+que **você** roda no **seu** terminal (o hook nega ao agente):
+
+```bash
+python .github/skill-contracts/scripts/approve_refinement.py --id REFINEMENT-0001 --reviewer "Seu Nome"
+```
+
+Ele confere tudo de novo, pede que você digite o ID, grava revisor e data e **sela** o conteúdo com
+`approval_digest` (SHA-256). Se o refinamento mudar depois, o validador recusa a aprovação.
+
+## 🔍 Fiscal — evidência conferida
+
+Com a base em `<repo>/.github/copilot-knowledge`, o validador confere que:
+
+- todo `` `arquivo:linha` `` citado existe e a linha está dentro do arquivo;
+- todo `EXISTING_TEST:arquivo::Teste` existe e contém o teste;
+- todo artefato citado (`HANDOFF-…`, `IMPACT-…`, `PROJECT-…`) existe.
+
+Em refinamentos é erro; em handoffs antigos é `WARNING` (não quebra nada existente).
+
+## 🌡️ Termômetro — CI e release verificável
+
+- `python tools/build_release.py` recusa lixo (`backups/`, `.pyc`, `installation.json`), regenera o `SHA256SUMS.txt`
+  e monta o zip em ordem fixa, igual em Windows e Linux.
+- `python tools/build_release.py --check` confere tudo sem escrever; `--verify-zip <zip>` prova que o zip contém
+  exatamente a pasta (arquivos, ordem e bytes).
+- O workflow do GitHub Actions roda higiene + testes em Windows e Linux (Python 3.11 e 3.13) e verifica que o zip
+  publicado contém exatamente a pasta publicada.
+
+---
+
 # Comandos `/legacy.*` — suas skills como comandos
 
 Assim como o Spec Kit tem `/speckit.*`, o pacote instala comandos `/legacy.*` no Copilot (prompt files em `.github/prompts/`). No chat em Agent Mode, digite `/legacy.` e escolha.
@@ -222,7 +281,7 @@ Assim como o Spec Kit tem `/speckit.*`, o pacote instala comandos `/legacy.*` no
 | `/legacy.handoff <mudança>` | Gera o HANDOFF (AS-IS da mudança) | `prepare-speckit-context` |
 | `/legacy.refine <história>` | PO técnico gera o REFINEMENT | `refine-user-story` |
 | `/legacy.answer <REFINEMENT> AMB-02: …` | Registra suas respostas às perguntas | `refine-user-story` |
-| `/legacy.approve <REFINEMENT> revisor: <nome>` | Registra sua revisão e libera `READY_FOR_SPECKIT` | `refine-user-story` + validador |
+| `/legacy.approve <REFINEMENT>` | Resume para revisão e entrega o comando de aprovação que **só você** roda | `approve_refinement.py` (humano) |
 | `/legacy.branch <descrição>` | Cria `feature/mmYYYY/...` a partir da `main` | `prepare-feature-branch` |
 | `/legacy.status [ID]` | Estado das histórias e próximo comando (somente leitura) | `story_status.py` |
 | `/legacy.validate` | Valida contratos e reconstrói o INDEX | `validate_artifacts.py`, `sync_index.py` |
@@ -233,7 +292,8 @@ Fluxo completo de uma história do PM, só com comandos:
 ```text
 /legacy.story <história do PM>
 /legacy.answer REFINEMENT-0001 AMB-02: A; AMB-03: 24 horas
-/legacy.approve REFINEMENT-0001 revisor: <seu nome>
+/legacy.approve REFINEMENT-0001
+python .github/skill-contracts/scripts/approve_refinement.py --id REFINEMENT-0001 --reviewer "<seu nome>"   ← você, no terminal
 /legacy.branch tratar-timeout-consulta
 /speckit.specify <história do PM>. Leia o HANDOFF-0001 e o REFINEMENT-0001.
 /speckit.clarify → /speckit.plan → /speckit.tasks → /speckit.analyze → /speckit.implement → /speckit.converge
@@ -244,7 +304,7 @@ Os comandos **não** trocam as skills: são atalhos que carregam a skill certa c
 - prefixo próprio `legacy.` — não colide com `/speckit.*`;
 - o instalador só grava arquivos `legacy.*.prompt.md`; qualquer outro prompt em `.github/prompts/` fica intacto;
 - `/legacy.story` nunca cria branch nem chama o Spec Kit, e nunca aprova;
-- `/legacy.approve` é o único caminho de aprovação, é digitado por você e desfaz a aprovação se o validador recusar;
+- a aprovação é `approve_refinement.py`, que só você roda (a fechadura nega ao agente) e que sela o conteúdo;
 - `/legacy.branch` recusa seguir se a história tem refinamento ainda não aprovado.
 
 Pedir as skills pelo nome (`Use a skill ... para ...`) continua funcionando como antes.
@@ -544,8 +604,8 @@ python install.py --target /caminho/repo --keep-legacy-v1
 # Versões deste pacote
 
 ```text
-Bundle:              1.3.0
-Legacy Discovery:    V2.3
+Bundle:              1.4.0
+Legacy Discovery:    V2.4
 Spec Kit / CLI:      1.0.1
 Integração padrão:   GitHub Copilot
 Python mínimo:       3.11

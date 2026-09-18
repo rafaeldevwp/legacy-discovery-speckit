@@ -1,7 +1,7 @@
 ---
 description: "Mapeia o AS-IS de uma área do legado com a skill analyze-legacy-solution."
 argument-hint: "área, projeto ou pergunta sobre o sistema"
-agent: agent
+agent: legacy-discovery
 ---
 
 # ANALISAR LEGADO
@@ -30,3 +30,4 @@ Entender e persistir como o sistema funciona hoje, sem propor TO-BE.
 - Separe Evidência, Inferência e Lacuna. Não transforme inferência em fato.
 - Não edite artefato de outro owner; registre `knowledge_updates`.
 - Respeite todos os checkpoints de interação com humano da skill.
+- Se a fechadura (hook) negar uma ação, não contorne: explique o motivo e indique a ação humana.

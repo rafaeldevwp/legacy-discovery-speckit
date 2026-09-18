@@ -1,7 +1,7 @@
 ---
 description: "Lista os comandos /legacy.*, mostra o estado das histórias e sugere o próximo passo."
 argument-hint: "(opcional) HANDOFF-NNNN ou REFINEMENT-NNNN"
-agent: agent
+agent: legacy-discovery
 ---
 
 # AJUDA
@@ -26,7 +26,7 @@ Orientar o usuário: quais comandos existem e qual é o próximo passo de cada h
 | `/legacy.handoff <mudança>` | Gera o SPECKIT_HANDOFF (prepare-speckit-context) |
 | `/legacy.refine <história>` | PO técnico gera o STORY_REFINEMENT (refine-user-story) |
 | `/legacy.answer <REFINEMENT> <respostas>` | Registra respostas humanas às perguntas AMB-NN |
-| `/legacy.approve <REFINEMENT> revisor: <nome>` | Registra sua revisão e libera READY_FOR_SPECKIT |
+| `/legacy.approve <REFINEMENT>` | Prepara sua aprovação: resumo + comando que só você roda |
 | `/legacy.branch <descrição>` | Cria a branch feature/mmYYYY/... (prepare-feature-branch) |
 | `/legacy.status [ID]` | Estado das histórias e próximo comando |
 | `/legacy.validate` | Valida contratos e reconstrói o INDEX |
@@ -43,3 +43,4 @@ Orientar o usuário: quais comandos existem e qual é o próximo passo de cada h
 - Separe Evidência, Inferência e Lacuna. Não transforme inferência em fato.
 - Não edite artefato de outro owner; registre `knowledge_updates`.
 - Respeite todos os checkpoints de interação com humano da skill.
+- Se a fechadura (hook) negar uma ação, não contorne: explique o motivo e indique a ação humana.

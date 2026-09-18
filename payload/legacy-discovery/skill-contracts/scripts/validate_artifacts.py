@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 
 from artifact_lib import parse_artifact
-from refinement_rules import check_refinement
+from refinement_rules import check_evidence, check_refinement, repo_root_for
 
 
 COMMON = {"schema_version", "artifact_type", "id", "status", "owner_skill", "created_at", "updated_at"}
@@ -29,7 +29,7 @@ STATUSES = {
     "INVESTIGATION": {"STATIC_HYPOTHESIS", "CONFIRMED", "REFUTED", "BLOCKED"},
     "IMPACT_ANALYSIS": {"COMPLETE", "PARTIAL", "BLOCKED"},
     "SPECKIT_HANDOFF": {"READY_FOR_SPECKIT", "PARTIAL", "BLOCKED"},
-    "STORY_REFINEMENT": {"READY_FOR_SPECKIT", "AWAITING_HUMAN", "BLOCKED"},
+    "STORY_REFINEMENT": {"READY_FOR_SPECKIT", "READY_FOR_REVIEW", "AWAITING_HUMAN", "BLOCKED"},
     "FIX_REGRESSION": {"PASSED", "FAILED", "UNSTABLE", "BLOCKED"},
     "FIX_SPEC": {"DRAFT", "READY_FOR_APPROVAL", "APPROVED", "BLOCKED"},
     "FIX_DESIGN": {"DRAFT", "READY_FOR_APPROVAL", "APPROVED", "BLOCKED"},
@@ -189,9 +189,17 @@ def main() -> int:
                 errors.append(f"{path}: broken local Markdown link {target}")
 
     handoffs = {a.metadata.get("id", ""): a for a in artifacts if a.metadata.get("artifact_type") == "SPECKIT_HANDOFF"}
+    known_ids = {a.metadata.get("id", "") for a in artifacts if a.metadata.get("id")}
+    repo_root = repo_root_for(root)
+    warnings: list[str] = []
     for refinement in artifacts:
         if refinement.metadata.get("artifact_type") == "STORY_REFINEMENT" and COMMON <= set(refinement.metadata):
-            errors.extend(check_refinement(refinement, handoffs))
+            errors.extend(check_refinement(refinement, handoffs, known_ids, repo_root, warnings))
+    if repo_root is not None:
+        for handoff in handoffs.values():
+            warnings.extend(check_evidence(handoff.path, handoff.body, repo_root, None))
+    for warning in warnings:
+        print(f"WARNING: {warning}", file=sys.stderr)
 
     for fix_dir in sorted(root.glob("fix-plans/FIX-[0-9][0-9][0-9][0-9]-*")):
         number = fix_dir.name[4:8]

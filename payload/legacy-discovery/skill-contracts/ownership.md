@@ -13,6 +13,8 @@ Each artifact type has one writer. Other skills may read it or record a requeste
 | `STORY_REFINEMENT` | `refine-user-story` |
 | Git branch `feature/mmYYYY/descricao-curta` | `prepare-feature-branch` |
 | `INDEX.md` | deterministic `sync_index.py` script |
+| Aprovação de `STORY_REFINEMENT` (`reviewed_by`, `reviewed_at`, `approval_digest`, `READY_FOR_SPECKIT`) | **humano**, via `approve_refinement.py` |
+| Hook `.github/hooks/legacy_governance.py` e agente `legacy-discovery` | instalador do pacote; nunca o agente |
 | Spec Kit `spec.md`, `plan.md`, `tasks.md` and managed `.specify/` artifacts | **Spec Kit**, nunca estas skills |
 
 ## V1 compatibility ownership

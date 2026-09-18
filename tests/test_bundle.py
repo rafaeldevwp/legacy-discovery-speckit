@@ -112,7 +112,7 @@ class RefinementContractTests(TempDirCase):
     def test_blocked_without_handoff_passes_with_reason(self) -> None:
         self.assertValid(self.validate(fx.refinement(
             status="BLOCKED", handoff_ref="NONE", block_reason="HANDOFF_MISSING",
-            reviewed_by="null", reviewed_at="null"), handoff_status=None))
+            reviewed_by="null", reviewed_at="null")))
 
     def test_ready_with_nonblocking_open_question_passes(self) -> None:
         text = fx.refinement(open_questions="1", body_replace=((
@@ -312,7 +312,7 @@ class CommandTests(unittest.TestCase):
             self.assertIsNotNone(match, f.name)
             head = match.group(1)
             self.assertRegex(head, r'(?m)^description: ".+"$', f.name)
-            self.assertRegex(head, r"(?m)^agent: agent$", f.name)
+            self.assertRegex(head, r"(?m)^agent: legacy-discovery$", f.name)
             for section in ("## Objetivo", "## Entradas Mínimas", "## Passos", "## Saída Obrigatória", "## Regras"):
                 self.assertIn(section, text, f"{f.name} {section}")
 
@@ -346,12 +346,13 @@ class CommandTests(unittest.TestCase):
             self.assertTrue(name.startswith("legacy."))
             self.assertNotIn("speckit", name)
 
-    def test_only_approve_command_writes_review(self) -> None:
+    def test_no_command_lets_the_agent_approve(self) -> None:
         approve = (self.dir / "legacy.approve.prompt.md").read_text(encoding="utf-8")
-        self.assertIn("nunca se autoaprova", approve)
+        self.assertIn("Você nunca executa `approve_refinement.py`", approve)
         for f in self.files:
-            if f.name != "legacy.approve.prompt.md":
-                self.assertNotIn("`reviewed_by`, `reviewed_at` (agora", f.read_text(encoding="utf-8"), f.name)
+            text = f.read_text(encoding="utf-8")
+            self.assertNotIn("`reviewed_by`, `reviewed_at` (agora", text, f.name)
+            self.assertNotRegex(text, r"(?im)^\d+\.\s+grave[^\n]*READY_FOR_SPECKIT", f.name)
 
 
 class StoryStatusTests(TempDirCase):

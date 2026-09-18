@@ -1,7 +1,7 @@
 ---
 description: "Investiga um bug no legado com a skill investigate-legacy-bug (localiza, não corrige)."
 argument-hint: "sintoma observado e comportamento esperado"
-agent: agent
+agent: legacy-discovery
 ---
 
 # INVESTIGAR BUG
@@ -29,3 +29,4 @@ Localizar o ponto provável da falha com evidência e nível de confiança.
 - Separe Evidência, Inferência e Lacuna. Não transforme inferência em fato.
 - Não edite artefato de outro owner; registre `knowledge_updates`.
 - Respeite todos os checkpoints de interação com humano da skill.
+- Se a fechadura (hook) negar uma ação, não contorne: explique o motivo e indique a ação humana.

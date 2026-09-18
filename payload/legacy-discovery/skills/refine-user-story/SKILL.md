@@ -36,8 +36,8 @@ Você NÃO PODE:
 - escrever `spec.md`, `plan.md`, `tasks.md` ou qualquer coisa em `.specify/` e `specs/`;
 - editar artefatos de outro owner (`SPECKIT_HANDOFF`, `IMPACT`, `PROJECT`...) — use `knowledge_updates`;
 - implementar código, criar testes, criar branch, fazer stage/commit/push;
-- preencher `reviewed_by` sem confirmação explícita do humano **nesta conversa**;
-- marcar `READY_FOR_SPECKIT` com pergunta bloqueante aberta.
+- preencher `reviewed_by` ou `approval_digest`, ou marcar `READY_FOR_SPECKIT` — isso é a aprovação humana (`approve_refinement.py`), e a fechadura nega;
+- citar `arquivo:linha`, teste ou artefato que você não abriu — o validador confere se existem.
 
 A fronteira é rígida:
 
@@ -132,7 +132,8 @@ Se o código contradisser o handoff, **não corrija o handoff**: registre em `kn
 
 ## Critério de prontidão
 
-- `READY_FOR_SPECKIT` — handoff relacionado está `READY_FOR_SPECKIT`; nenhuma ambiguidade `OPEN_HUMAN` bloqueante; todo AC tem origem; toda fatia cobre AC e guardrail; humano revisou o refinamento (`reviewed_by` + `reviewed_at`).
+- `READY_FOR_REVIEW` — handoff relacionado está `READY_FOR_SPECKIT`; nenhuma ambiguidade `OPEN_HUMAN` bloqueante; todo AC tem origem; toda fatia cobre AC e guardrail. **É o máximo que esta skill grava.**
+- `READY_FOR_SPECKIT` — o mesmo, mais a aprovação humana: `reviewed_by`, `reviewed_at` e `approval_digest`, gravados **somente** por `approve_refinement.py`, executado pelo humano no próprio terminal. Qualquer edição posterior quebra o lacre; volte para `READY_FOR_REVIEW` e peça nova aprovação.
 - `AWAITING_HUMAN` — existe pelo menos uma pergunta `OPEN_HUMAN`; o refinamento está parado esperando resposta.
 - `BLOCKED` — falta pré-condição que o humano não resolve respondendo pergunta (handoff inexistente/bloqueado, conhecimento stale, conflito que exige outra skill). Registre `block_reason` com código de `failure-policy.md`.
 
@@ -192,9 +193,9 @@ Esta skill é acionada pelos comandos (prompt files em `.github/prompts/`):
 | `/legacy.refine` | refinamento novo ou nova rodada |
 | `/legacy.story` | chamada depois do handoff, no fluxo guiado |
 | `/legacy.answer` | registrar respostas humanas às `AMB-NN` |
-| `/legacy.approve` | registrar a revisão humana e aplicar `READY_FOR_SPECKIT` |
+| `/legacy.approve` | resumir para revisão e entregar ao humano o comando `approve_refinement.py` |
 
-`reviewed_by` só pode ser gravado a partir de `/legacy.approve` digitado pelo humano, ou de confirmação explícita equivalente na conversa. Em qualquer outro comando, nunca aprove.
+Você nunca aprova. A aprovação é `approve_refinement.py`, executado pelo humano; o agente `legacy-discovery` tem uma fechadura (hook) que nega esse script, `reviewed_by`, `approval_digest` e `READY_FOR_SPECKIT` em refinamentos.
 
 ## Privacidade e versionamento
 

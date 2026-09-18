@@ -1,7 +1,7 @@
 ---
 description: "Registra as respostas humanas às perguntas AMB-NN de um refinamento."
 argument-hint: "REFINEMENT-NNNN AMB-02: <resposta>; AMB-03: <resposta>"
-agent: agent
+agent: legacy-discovery
 ---
 
 # RESPONDER PERGUNTAS
@@ -18,7 +18,7 @@ Gravar respostas humanas literais no refinamento e fazer a próxima rodada.
 2. Para cada resposta: `ANSWERED_BY_HUMAN` (ou `ASSUMPTION_ACCEPTED` se aceitou literalmente a sugestão), resposta literal, quem e quando.
 3. Resposta ambígua: não interprete — pergunte de novo. Nova dúvida gerada: novo `AMB-NN`.
 4. Atualize AC/GR/fatias afetados, incremente `revision`, recalcule `open_questions`.
-5. Mantenha `AWAITING_HUMAN` enquanto houver `OPEN_HUMAN`; rode validar → indexar → validar.
+5. Mantenha `AWAITING_HUMAN` enquanto houver `OPEN_HUMAN`; sem nenhuma, grave `READY_FOR_REVIEW`. Rode validar → indexar → validar.
 
 ## Saída Obrigatória
 - Perguntas que continuam abertas (completas) ou `NONE`.
@@ -32,3 +32,4 @@ Gravar respostas humanas literais no refinamento e fazer a próxima rodada.
 - Separe Evidência, Inferência e Lacuna. Não transforme inferência em fato.
 - Não edite artefato de outro owner; registre `knowledge_updates`.
 - Respeite todos os checkpoints de interação com humano da skill.
+- Se a fechadura (hook) negar uma ação, não contorne: explique o motivo e indique a ação humana.

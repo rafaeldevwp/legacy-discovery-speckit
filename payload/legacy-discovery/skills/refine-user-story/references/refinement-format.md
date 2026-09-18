@@ -35,14 +35,15 @@ block_reason: null
 
 | Campo | Regra |
 |---|---|
-| `status` | `READY_FOR_SPECKIT`, `AWAITING_HUMAN` ou `BLOCKED` |
+| `status` | `AWAITING_HUMAN`, `READY_FOR_REVIEW`, `READY_FOR_SPECKIT` (só pela aprovação humana) ou `BLOCKED` |
 | `story_ref` | ID do work item do PM, ou `UNSPECIFIED` |
 | `handoff` | `HANDOFF-NNNN` existente na base, ou `NONE` |
 | `revision` | inteiro ≥ 1; incrementa a cada rodada |
 | `decision_owner` | quem responde pelas decisões de negócio |
 | `open_questions` | **igual** ao número de linhas `OPEN_HUMAN` no registro |
 | `source_access` | `NONE` ou `BOUNDED` |
-| `reviewed_by` / `reviewed_at` | `null` até o humano confirmar a revisão nesta conversa; obrigatórios em `READY_FOR_SPECKIT` |
+| `reviewed_by` / `reviewed_at` | `null` até a aprovação; gravados só por `approve_refinement.py` |
+| `approval_digest` | lacre SHA-256 gravado pela aprovação; ausente antes dela |
 | `block_reason` | `null`, ou código de `failure-policy.md`; obrigatório em `BLOCKED` |
 
 ## Corpo obrigatório
@@ -173,14 +174,27 @@ Sempre:
 - `handoff` aponta para um `SPECKIT_HANDOFF` existente (ou `NONE`);
 - `AWAITING_HUMAN` tem ao menos uma `OPEN_HUMAN`; `BLOCKED` tem `block_reason`.
 
-Adicionalmente em `READY_FOR_SPECKIT`:
+Evidência (quando a base está em `<repo>/.github/copilot-knowledge`):
+
+- todo `` `arquivo:linha` `` citado existe e a linha está dentro do arquivo;
+- todo `EXISTING_TEST:arquivo::Teste` existe e contém o nome do teste;
+- todo ID de artefato citado (`HANDOFF-…`, `IMPACT-…`, `PROJECT-…`…) existe na base;
+- o bloco `## Story (verbatim)` não é conferido (é texto do PM).
+
+Adicionalmente em `READY_FOR_REVIEW` e `READY_FOR_SPECKIT`:
 
 - `handoff` existe e está `READY_FOR_SPECKIT`;
 - nenhuma `OPEN_HUMAN` com `Blocking: YES`;
-- `reviewed_by` e `reviewed_at` preenchidos (ISO-8601);
 - ao menos um `AC-NN`, todos com `Origin` válida; `HUMAN:AMB-NN` aponta para ambiguidade respondida ou aceita;
 - guardrails presentes (tabela ou `NO_EXISTING_BEHAVIOR_AFFECTED`);
 - ao menos uma `SLICE-NN`; toda fatia cita AC existente; todo AC e todo GR aparecem em alguma fatia; `Depends on` só cita fatias existentes.
+
+Somente em `READY_FOR_SPECKIT`:
+
+- `reviewed_by` e `reviewed_at` preenchidos (ISO-8601);
+- `approval_digest` confere com o conteúdo atual (sem ele: aviso de aprovação v5, não selada).
+
+Fora de `READY_FOR_SPECKIT`, `reviewed_by` e `approval_digest` precisam estar vazios.
 
 ## Critérios de qualidade
 

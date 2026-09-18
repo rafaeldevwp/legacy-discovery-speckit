@@ -13,7 +13,7 @@ Eles não substituem as skills: cada comando é um atalho que carrega a skill ce
 | `/legacy.handoff` | Gera o SPECKIT_HANDOFF (AS-IS da mudança) com a skill prepare-speckit-context. |
 | `/legacy.refine` | PO técnico: refina a história do PM e gera o STORY_REFINEMENT com a skill refine-user-story. |
 | `/legacy.answer` | Registra as respostas humanas às perguntas AMB-NN de um refinamento. |
-| `/legacy.approve` | Registra a revisão humana de um refinamento e o libera como READY_FOR_SPECKIT, se os guardrails passarem. |
+| `/legacy.approve` | Prepara a aprovação humana de um refinamento: mostra o resumo e o comando que só você pode rodar. |
 | `/legacy.branch` | Cria a branch feature/mmYYYY/descricao-curta a partir da main atualizada (prepare-feature-branch). |
 | `/legacy.story` | Fluxo guiado de uma história do PM: handoff → refinamento, parando em cada decisão humana. |
 | `/legacy.status` | Mostra o estado de cada história (handoff, refinamento, perguntas abertas) e o próximo comando. |
@@ -23,8 +23,11 @@ Eles não substituem as skills: cada comando é um atalho que carrega a skill ce
 Fluxo típico de uma história do PM:
 
 ```text
-/legacy.story <história>  →  /legacy.answer …  →  /legacy.approve REFINEMENT-NNNN revisor: <nome>
+/legacy.story <história>  →  /legacy.answer …  →  /legacy.approve REFINEMENT-NNNN
+→  (você, no terminal) python .github/skill-contracts/scripts/approve_refinement.py --id REFINEMENT-NNNN --reviewer "<nome>"
 →  /legacy.branch <descrição>  →  /speckit.specify …
 ```
+
+Todos rodam no agente `legacy-discovery` (`.github/agents/legacy-discovery.agent.md`), que carrega a fechadura `.github/hooks/legacy_governance.py`.
 
 O prefixo `legacy.` evita colisão com os comandos do Spec Kit. O instalador só escreve arquivos `legacy.*.prompt.md`; outros prompts em `.github/prompts/` não são tocados.
