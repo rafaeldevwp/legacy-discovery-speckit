@@ -18,6 +18,105 @@ E tem uma **trava de segurança**: a IA não consegue aprovar nada sozinha, nem 
 
 ---
 
+## Como isso ajuda no seu dia a dia
+
+**Sem a ferramenta**, a IA lê alguns arquivos, acha que entendeu e sai programando. Em sistema legado isso costuma dar errado, porque a regra de verdade está espalhada, sem documentação, e o pedido do PM quase sempre é vago.
+
+**Com a ferramenta**, antes de qualquer código a IA:
+
+| Faz | Você ganha |
+|---|---|
+| Mapeia como o sistema funciona hoje, citando `arquivo:linha` | Você confere a evidência em vez de confiar num palpite |
+| Lista o que o pedido não deixa claro | As dúvidas vão para o PM **antes** de virar retrabalho |
+| Separa fato, suposição e o que ninguém sabe | Você sabe o que é certo e o que ainda é aposta |
+| Aponta o que pode quebrar | Você já sabe o que testar |
+| Espera a sua aprovação | Nada avança sem uma pessoa decidir |
+
+### Cenários reais
+
+Os exemplos abaixo são ilustrativos, mas as situações são as que você vive em sistemas antigos.
+
+#### 1. "É só trocar o limite de desconto de 10% para 15%"
+
+**A situação:** o PM acha que é uma linha de código. Só que o 10% aparece em três lugares: no serviço de negócio, numa procedure do banco e num relatório que o financeiro usa.
+
+**Sem a ferramenta:** a IA troca no serviço, o teste passa e vai para produção. O relatório continua calculando com 10%, e o financeiro só descobre no fechamento do mês.
+
+**Com a ferramenta:**
+```text
+/legacy.story
+US-310: Aumentar o limite de desconto de 10% para 15%.
+Quem decide regra de negócio: Marina (PM).
+```
+A ferramenta encontra os três pontos, cita o arquivo e a linha de cada um, e devolve perguntas para a Marina que a IA não pode responder sozinha:
+- o 15% vale para **todos** os clientes ou só para alguns?
+- o relatório do financeiro deve mudar junto?
+
+Nada avança até essas respostas estarem registradas.
+
+#### 2. Bug que só acontece em produção
+
+**A situação:** "A segunda via do boleto às vezes sai com vencimento no domingo." Ninguém sabe onde é. O cálculo passa por quatro classes e por uma regra de tolerância.
+
+**Sem a ferramenta:** a IA aponta uma causa com toda a confiança e "corrige". O bug continua, porque a causa era outra.
+
+**Com a ferramenta:**
+```text
+/legacy.bug
+Sintoma: segunda via sai com vencimento no domingo.
+Esperado: próximo dia útil. Ambiente: produção, desde 01/09.
+```
+Você recebe uma lista de hipóteses **ordenadas por confiança**, cada uma com a evidência que a sustenta e as que foram descartadas (com o motivo). Ela **não corrige nada**. Você decide o próximo passo já sabendo qual é a causa mais provável e qual teste prova isso.
+
+#### 3. História do PM vaga demais
+
+**A situação:** "Quando o serviço externo demorar, o cidadão não pode ficar sem resposta." Demorar quanto? Sem resposta como? Mostrar o quê?
+
+**Sem a ferramenta:** a IA decide sozinha (por exemplo, 30 segundos e uma mensagem genérica). Na homologação o PM diz que não era isso, e o trabalho é refeito.
+
+**Com a ferramenta:** `/legacy.story` devolve as perguntas numeradas (AMB-01, AMB-02…), marcando quais impedem o início. Você leva ao PM, cola as respostas com `/legacy.answer`, e elas ficam registradas com o nome de quem respondeu. Se a resposta for "o normal", a IA pergunta de novo.
+
+#### 4. Módulo que ninguém conhece mais
+
+**A situação:** quem escreveu saiu da empresa, não há documentação e você precisa alterar o cálculo de multa por atraso.
+
+**Sem a ferramenta:** você passa dias lendo código antes de arriscar uma alteração.
+
+**Com a ferramenta:**
+```text
+/legacy.analyze Como funciona o cálculo de multa por atraso?
+```
+Você recebe um mapa do módulo (quem chama quem, onde ficam as regras, o que depende de quê), salvo no repositório. O mapa é reaproveitado nas próximas histórias, então a IA não relê tudo de novo.
+
+#### 5. Método usado por sistemas que você nem enxerga
+
+**A situação:** você vai alterar um método de gravação de histórico. Ele é chamado por três telas, um serviço WCF e talvez por integrações de outras equipes.
+
+**Sem a ferramenta:** você descobre os consumidores quando eles quebram.
+
+**Com a ferramenta:**
+```text
+/legacy.impact Método HistoricoRepository.Gravar, mudança de comportamento
+```
+Você recebe o nível de risco com critério objetivo, quem depende do método direta e indiretamente, e uma lista do que **não foi possível ver** (por exemplo, consumidores externos ao repositório). Esse aviso já diz com quem conversar antes de mexer.
+
+#### 6. A IA "ajudando" além da conta
+
+**A situação:** a IA, tentando ser útil, marca o refinamento como aprovado, edita as próprias regras para passar na validação ou faz `git push`.
+
+**Com a ferramenta:** a trava de segurança nega. Aprovar só é possível por um comando que **você** roda no seu terminal, e o que a IA tentou fica registrado. Quando alguém pergunta "quem aprovou isso?", a resposta é uma pessoa, com nome e data.
+
+### Resumo do ganho
+
+```text
+Menos retrabalho    perguntas resolvidas antes de programar
+Menos regressão     você sabe o que pode quebrar e o que testar
+Menos dependência   o conhecimento do sistema fica registrado no repositório
+Mais controle       a IA ajuda, mas quem decide e aprova é você
+```
+
+---
+
 ## O que você precisa ter
 
 | Item | Como saber se você tem |
