@@ -1,629 +1,165 @@
-# Legacy Discovery + Spec Kit — pacote único
+# Legacy Discovery + Spec Kit
 
-> Entender o sistema legado antes de mudá-lo, refinar a história do PM com um PO técnico e só então
-> especificar e implementar com o [Spec Kit](https://github.com/github/spec-kit) — com uma fechadura que
-> impede o agente de aprovar, escrever código de produção ou afrouxar as próprias regras.
+**Deixe a IA entender o seu sistema antigo *antes* de mexer nele.**
 
-**⬇️ Baixe a última versão em [Releases](https://github.com/rafaeldevwp/legacy-discovery-speckit/releases/latest)** ·
-**📖 [Manual completo](docs/MANUAL.md)** ·
-**🧪 106+ testes de não-regressão em Windows e Linux**
+Quando você pede uma mudança para a IA num sistema legado, ela costuma chutar como o sistema funciona hoje e chutar o que o pedido quis dizer. É assim que nascem os bugs novos.
 
+Esta ferramenta obriga a IA a seguir três passos antes de escrever código:
 
-Este ZIP existe para você **não precisar instalar e juntar duas coisas manualmente**.
+```text
+1. ENTENDER            2. TIRAR AS DÚVIDAS           3. SÓ ENTÃO FAZER
+"Como o sistema        "O que o pedido quer dizer?   Especificar, planejar
+ funciona hoje?"        O que não pode quebrar?"     e programar (Spec Kit)
+```
 
-Ele combina:
+E tem uma **trava de segurança**: a IA não consegue aprovar nada sozinha, nem mexer no código de produção durante a análise, nem publicar nada. Quem aprova é você.
 
-1. **GitHub Spec Kit oficial** — fixado em `specify-cli 1.0.1`;
-2. **Legacy Discovery V2.4** — suas Skills para entender o AS-IS de sistemas legados grandes e refinar histórias antes do Spec Kit, com fechadura de governança;
-3. **instalador único** — inicializa o Spec Kit e instala as Skills no mesmo repositório;
-4. **Persistent Knowledge + HANDOFF** — a ponte entre Discovery e Spec Kit.
-
-> Importante: este é um **bundle de instalação**, não um pacote air-gapped. Você baixa **um único ZIP**, mas na primeira execução o instalador usa a internet para obter o `specify-cli==1.0.1` oficial e suas dependências. Depois ele faz toda a montagem automaticamente.
+**[⬇️ Baixar a última versão](https://github.com/rafaeldevwp/legacy-discovery-speckit/releases/latest)** · **[📖 Manual passo a passo](docs/MANUAL.md)**
 
 ---
 
-## Para que serve?
+## O que você precisa ter
 
-Pense assim:
+| Item | Como saber se você tem |
+|---|---|
+| Windows (Linux e macOS também funcionam, veja o Manual) | — |
+| **Git** | abra o terminal e digite `git --version` |
+| **Python 3.11 ou mais novo** | `python --version` |
+| **VS Code** com **GitHub Copilot** | o ícone do Copilot aparece no VS Code |
+| Internet (só na instalação) | — |
 
-```text
-SISTEMA LEGADO
-     │
-     ▼
-Legacy Discovery
-"Como funciona hoje?"
-     │
-     ▼
-Persistent Knowledge
-     │
-     ▼
-HANDOFF
-     │
-     ▼
-Spec Kit
-"O que vamos mudar?"
-     │
-     ▼
-Spec → Plan → Tasks → Implement → Converge
-```
-
-O Discovery não decide a solução futura. O Spec Kit não precisa redescobrir o legado inteiro a cada User Story.
+Não sabe se tem? Digite os comandos acima. Se aparecer um número de versão, está ok.
 
 ---
 
-# Instalação rápida — Windows
+## Instalar (3 passos, uns 5 minutos)
 
-## Você precisa ter
+**1. Salve seu trabalho.** Na pasta do seu sistema, faça commit do que estiver pendente. (Se não sabe fazer isso, peça a alguém do time. É só para garantir que nada se misture.)
 
-- Git;
-- VS Code;
-- GitHub Copilot funcionando;
-- Python **3.11 ou superior**;
-- internet na primeira instalação.
+**2. Baixe e descompacte.** Na página de [Releases](https://github.com/rafaeldevwp/legacy-discovery-speckit/releases/latest), baixe o arquivo `.zip` e descompacte numa pasta **curta**, por exemplo `C:\Ferramentas\`.
 
-`uv` é recomendado, mas **não é obrigatório**: se o instalador não encontrar `uv`, usa `pip`.
+> Pasta curta importa: caminhos muito compridos no Windows fazem arquivos serem ignorados sem aviso.
 
-## Passo 1 — proteja seu código
-
-Na raiz do legado:
-
-```bash
-git status
-```
-
-Faça commit ou stash do que não quiser misturar com a instalação.
-
-## Passo 2 — descompacte este ZIP
-
-Pode ser fora do seu repositório, por exemplo:
-
-```text
-C:\Ferramentas\legacy-speckit-all-in-one\
-```
-
-## Passo 3 — execute
-
-Dê dois cliques em:
-
-```text
-INSTALAR-WINDOWS.bat
-```
-
-Ele perguntará:
+**3. Dê dois cliques em `INSTALAR-WINDOWS.bat`.** Quando ele pedir o repositório, cole o caminho da pasta do seu sistema (a que tem a pasta `.git`):
 
 ```text
 Repositorio: C:\Projetos\MeuSistemaLegado
 ```
 
-Informe a **raiz do repositório**, onde existe a pasta/arquivo `.git`.
-
-Pronto. O instalador faz o restante.
+Espere aparecer **INSTALAÇÃO CONCLUÍDA**. Ele faz backup do que altera, então é seguro.
 
 ---
 
-# O que o instalador faz?
+## Conferir se funcionou (1 minuto)
 
-Automaticamente:
+1. Abra a pasta do seu sistema no **VS Code**.
+2. Abra o chat do **Copilot** e troque o modo para **Agent**.
+3. Digite `/legacy.help` e envie.
 
-```text
-1. cria backup preventivo
-2. instala specify-cli 1.0.1 oficial
-3. executa Spec Kit no repositório existente
-4. configura integração GitHub Copilot
-5. instala suas 6 Skills ativas (4 de Discovery + 1 de PO + 1 de Git)
-6. instala os contratos e scripts do Knowledge Store
-7. cria .github/copilot-knowledge
-8. arquiva skills antigas da V1, sem apagá-las
-9. instala os comandos `/legacy.*` em `.github/prompts/`
-10. valida a estrutura instalada
-```
-
-O comando de inicialização equivalente é:
-
-```bash
-specify init --here --force --non-interactive --integration copilot --ignore-agent-tools
-```
+Apareceu uma lista de comandos? Pronto, está instalado.
 
 ---
 
-# O que ficará dentro do seu repositório?
+## Seu primeiro dia
 
-A estrutura principal será semelhante a:
+Faça isto **uma única vez** por sistema.
 
-```text
-SEU-LEGADO/
-├── .github/
-│   ├── prompts/                  ← Spec Kit / Copilot + comandos legacy.*.prompt.md
-│   ├── skills/
-│   │   ├── analyze-legacy-solution/
-│   │   ├── investigate-legacy-bug/
-│   │   ├── analyze-change-impact/
-│   │   ├── prepare-speckit-context/
-│   │   ├── prepare-feature-branch/
-│   │   └── refine-user-story/
-│   ├── skill-contracts/
-│   ├── copilot-knowledge/
-│   │   ├── INDEX.md
-│   │   ├── projects/
-│   │   ├── decisions/
-│   │   ├── deep-dives/
-│   │   ├── investigations/
-│   │   ├── impact-analyses/
-│   │   ├── handoffs/
-│   │   └── refinements/
-│   └── legacy-discovery/
-├── .specify/                     ← Spec Kit
-├── specs/                        ← features do Spec Kit
-└── seu código...
-```
-
-Se forem encontradas as antigas skills:
-
-```text
-coordinate-fix
-execute-fix-plan
-run-solution-regression
-```
-
-elas são movidas para:
-
-```text
-.github/legacy-workflow-v1/
-```
-
-Nada é simplesmente descartado.
-
----
-
-# Primeiro uso
-
-Abra a raiz do repositório no VS Code e abra o Copilot em **Agent Mode**.
-
-## 1. Defina as regras do projeto
-
-Execute uma única vez:
+**1. Diga as regras do projeto.** No chat:
 
 ```text
 /speckit.constitution
+Este é um sistema legado crítico. Preserve o que já existe e não modernize
+nada sem justificativa. Não trate palpite como fato.
 ```
 
-Exemplo de pedido:
+**2. Peça o primeiro mapa do sistema.**
 
 ```text
-Este é um sistema legado crítico.
-Preserve contratos e compatibilidade existentes.
-Não modernize tecnologia sem justificativa explícita.
-Trate os HANDOFFs do Legacy Discovery como contexto factual AS-IS.
-Decisões TO-BE pertencem ao Spec Kit.
-Não trate inferência como fato.
+/legacy.analyze Visão geral: projetos, o que cada um faz e integrações externas.
 ```
 
-Quando evoluir para `/speckit.plan`, preserve a arquitetura existente por padrão e use o HANDOFF apenas como base factual para enriquecer decisões.
+A IA fará algumas perguntas rápidas (o que olhar, até onde ir). Responda curto. Ela guarda o que aprendeu e reaproveita depois, sem reler tudo.
 
-## 2. Faça o primeiro mapa do legado
-
-No Copilot:
-
-```text
-Use a skill analyze-legacy-solution para iniciar o conhecimento deste repositório.
-Faça discovery progressivo.
-Comece por estrutura, projetos, responsabilidades, dependências,
-integrações e arquivos-âncora.
-Persista em .github/copilot-knowledge.
-Não implemente e não proponha modernização.
-```
-
-Não peça para estudar milhares de arquivos profundamente de uma vez.
+> Não peça "estude o sistema inteiro a fundo". Comece pela visão geral e aprofunde só a parte de que a história precisa.
 
 ---
 
-# Fechadura, lacre e fiscal (v6)
+## Uso diário: chegou uma história do PM
 
-A v5 tinha regras ótimas, mas algumas funcionavam **na confiança**. A v6 troca confiança por mecanismo.
+Este é o caminho que você vai repetir sempre. **Você só digita comandos; a IA faz o trabalho pesado e para quando precisa de você.**
 
-## 🔒 Fechadura — agente `legacy-discovery` com hook
-
-Os comandos `/legacy.*` rodam no agente `.github/agents/legacy-discovery.agent.md`, que carrega o hook
-`.github/hooks/legacy_governance.py` (mesmo protocolo do AgentQA: `PreToolUse`, `allow`/`deny`, falha fechada).
-Antes de **cada** ferramenta, o hook nega:
-
-| Negado | Por quê |
-|---|---|
-| escrever fora de `.github/copilot-knowledge/` e de projetos de teste | skills não implementam |
-| escrever em `.specify/`, `specs/` | território do Spec Kit |
-| editar skills, contratos, validador, o próprio hook, o agente, os comandos, o `INDEX.md` | o agente não pode afrouxar as regras para passar |
-| gravar `READY_FOR_SPECKIT` em refinamento, `reviewed_by`, `approval_digest` | aprovação é ato humano |
-| rodar `approve_refinement.py` ou `archive-and-clean` | idem |
-| `git push/commit/add/reset/stash/rebase/merge/switch/checkout...` | skills não publicam nem reescrevem histórico |
-| escrever/apagar via terminal em trilhas protegidas; `-EncodedCommand` | tudo tem que ser inspecionável |
-
-Continua **livre**: ler, buscar, compilar, testar, rodar os scripts de contrato, `git status/log/diff/fetch`,
-criar a branch pelo script oficial. Negações ficam em `.github/copilot-knowledge/governance-log/`.
-
-> Regra de desenho herdada do AgentQA: *um hook que bloqueia trabalho legítimo acaba sendo desligado*.
-> A fechadura nega só violações claras. Ela é uma fechadura, não um cofre: impede o erro e o atalho, não um ataque deliberado.
-
-## 🔏 Lacre — aprovação só humana
-
-Novo status `READY_FOR_REVIEW`: refinamento sem pergunta bloqueante, aguardando você. A aprovação é um script
-que **você** roda no **seu** terminal (o hook nega ao agente):
-
-```bash
-python .github/skill-contracts/scripts/approve_refinement.py --id REFINEMENT-0001 --reviewer "Seu Nome"
-```
-
-Ele confere tudo de novo, pede que você digite o ID, grava revisor e data e **sela** o conteúdo com
-`approval_digest` (SHA-256). Se o refinamento mudar depois, o validador recusa a aprovação.
-
-## 🔍 Fiscal — evidência conferida
-
-Com a base em `<repo>/.github/copilot-knowledge`, o validador confere que:
-
-- todo `` `arquivo:linha` `` citado existe e a linha está dentro do arquivo;
-- todo `EXISTING_TEST:arquivo::Teste` existe e contém o teste;
-- todo artefato citado (`HANDOFF-…`, `IMPACT-…`, `PROJECT-…`) existe.
-
-Em refinamentos é erro; em handoffs antigos é `WARNING` (não quebra nada existente).
-
-## 🌡️ Termômetro — CI e release verificável
-
-- `python tools/build_release.py` recusa lixo (`backups/`, `.pyc`, `installation.json`), regenera o `SHA256SUMS.txt`
-  e monta o zip em ordem fixa, igual em Windows e Linux.
-- `python tools/build_release.py --check` confere tudo sem escrever; `--verify-zip <zip>` prova que o zip contém
-  exatamente a pasta (arquivos, ordem e bytes).
-- O workflow do GitHub Actions roda higiene + testes em Windows e Linux (Python 3.11 e 3.13) e verifica que o zip
-  publicado contém exatamente a pasta publicada.
-
----
-
-# Comandos `/legacy.*` — suas skills como comandos
-
-Assim como o Spec Kit tem `/speckit.*`, o pacote instala comandos `/legacy.*` no Copilot (prompt files em `.github/prompts/`). No chat em Agent Mode, digite `/legacy.` e escolha.
-
-| Comando | O que faz | Skill / script |
+| # | Você digita | O que acontece |
 |---|---|---|
-| `/legacy.help` | Lista os comandos e sugere o próximo passo de cada história | `story_status.py` |
-| `/legacy.story <história>` | **Fluxo guiado**: handoff → refinamento, parando em cada decisão humana | várias |
-| `/legacy.analyze <área>` | Mapeia o AS-IS | `analyze-legacy-solution` |
-| `/legacy.bug <sintoma>` | Investiga bug, sem corrigir | `investigate-legacy-bug` |
-| `/legacy.impact <alvo>` | Raio de impacto | `analyze-change-impact` |
-| `/legacy.handoff <mudança>` | Gera o HANDOFF (AS-IS da mudança) | `prepare-speckit-context` |
-| `/legacy.refine <história>` | PO técnico gera o REFINEMENT | `refine-user-story` |
-| `/legacy.answer <REFINEMENT> AMB-02: …` | Registra suas respostas às perguntas | `refine-user-story` |
-| `/legacy.approve <REFINEMENT>` | Resume para revisão e entrega o comando de aprovação que **só você** roda | `approve_refinement.py` (humano) |
-| `/legacy.branch <descrição>` | Cria `feature/mmYYYY/...` a partir da `main` | `prepare-feature-branch` |
-| `/legacy.status [ID]` | Estado das histórias e próximo comando (somente leitura) | `story_status.py` |
-| `/legacy.validate` | Valida contratos e reconstrói o INDEX | `validate_artifacts.py`, `sync_index.py` |
-| `/legacy.archive [limpar]` | Arquiva artefatos locais das skills | `archive_skill_artifacts.py` |
+| 1 | `/legacy.story` + a história do PM, copiada como veio | A IA descobre como o sistema faz isso hoje e monta um refinamento, com perguntas para o PM se houver dúvida |
+| 2 | Leve as perguntas ao PM. Depois: `/legacy.answer REFINEMENT-0001 AMB-01: <resposta do PM>` | A IA registra as respostas. Se surgir dúvida nova, volta ao passo 2 |
+| 3 | `/legacy.approve REFINEMENT-0001` | A IA resume tudo e te entrega **um comando**. Leia o resumo |
+| 4 | **Você** cola esse comando no terminal do VS Code | Isso é a sua aprovação. A IA não consegue fazer isso por você |
+| 5 | `/legacy.branch nome-curto-da-mudanca` | Cria a branch de trabalho, do jeito certo |
+| 6 | `/speckit.specify` + a história | A partir daqui é o Spec Kit: `clarify`, `plan`, `tasks`, `implement` |
 
-Fluxo completo de uma história do PM, só com comandos:
+**Exemplo real do passo 1:**
 
 ```text
-/legacy.story <história do PM>
-/legacy.answer REFINEMENT-0001 AMB-02: A; AMB-03: 24 horas
-/legacy.approve REFINEMENT-0001
-python .github/skill-contracts/scripts/approve_refinement.py --id REFINEMENT-0001 --reviewer "<seu nome>"   ← você, no terminal
-/legacy.branch tratar-timeout-consulta
-/speckit.specify <história do PM>. Leia o HANDOFF-0001 e o REFINEMENT-0001.
-/speckit.clarify → /speckit.plan → /speckit.tasks → /speckit.analyze → /speckit.implement → /speckit.converge
+/legacy.story
+US-4821: Como atendente, quero que a consulta de veículos mostre a última
+situação conhecida quando o serviço externo demorar, para não deixar o
+cidadão sem resposta.
+
+Quem decide regra de negócio: Marina (PM).
 ```
 
-Os comandos **não** trocam as skills: são atalhos que carregam a skill certa com as entradas certas. Os guardrails continuam nas skills e nos scripts de contrato. Garantias:
-
-- prefixo próprio `legacy.` — não colide com `/speckit.*`;
-- o instalador só grava arquivos `legacy.*.prompt.md`; qualquer outro prompt em `.github/prompts/` fica intacto;
-- `/legacy.story` nunca cria branch nem chama o Spec Kit, e nunca aprova;
-- a aprovação é `approve_refinement.py`, que só você roda (a fechadura nega ao agente) e que sela o conteúdo;
-- `/legacy.branch` recusa seguir se a história tem refinamento ainda não aprovado.
-
-Pedir as skills pelo nome (`Use a skill ... para ...`) continua funcionando como antes.
+**Perdido? Digite `/legacy.status`.** Ele mostra em que passo cada história está e qual é o próximo comando.
 
 ---
 
-# Uso diário — nova User Story
+## Outros usos comuns
 
-Imagine:
-
-> Alterar a consulta de veículos para tratar timeout sem perder o último estado conhecido.
-
-Primeiro:
-
-```text
-Use a skill prepare-speckit-context para esta mudança:
-
-Alterar a consulta de veículos para tratar timeout sem perder o último estado conhecido.
-
-Reutilize primeiro o Persistent Knowledge.
-Abra source somente para gaps.
-Não proponha TO-BE.
-Não implemente.
-Gere o SPECKIT_HANDOFF.
-```
-
-A Skill verifica:
-
-```text
-já sabemos o suficiente?
-      │
-   ┌──┴──┐
-  SIM   NÃO
-   │      │
-reusa   investiga apenas o gap
-   └──┬───┘
-      ▼
-   HANDOFF
-```
-
-Quando retornar:
-
-```text
-READY_FOR_SPECKIT
-```
-
-refine a história com o PO técnico:
-
-```text
-Use a skill refine-user-story para refinar esta história do PM:
-
-<história literal do PM>
-
-Use o HANDOFF gerado como base AS-IS.
-```
-
-Responda as perguntas que ela devolver. Quando o refinamento estiver `READY_FOR_SPECKIT` (só acontece após sua revisão), crie a branch de trabalho:
-
-```text
-Use a skill prepare-feature-branch para esta mudança.
-```
-
-Ela atualiza `main` somente por fast-forward e cria:
-
-```text
-feature/mmYYYY/descricao-curta
-```
-
-Exemplo:
-
-```text
-feature/082026/tratar-timeout-pbh
-```
-
-Depois siga com:
-
-```text
-/speckit.specify
-/speckit.clarify
-/speckit.plan
-/speckit.tasks
-/speckit.analyze
-/speckit.implement
-/speckit.converge
-```
-
----
-
-# Branch Git antes do Spec Kit
-
-Para mudanças que serão implementadas, o fluxo padrão inclui uma branch dedicada:
-
-```text
-HANDOFF READY
-    ↓
-prepare-feature-branch
-    ↓
-main atualizada com --ff-only
-    ↓
-feature/mmYYYY/descricao-curta
-    ↓
-/speckit.specify
-```
-
-A Skill nunca executa `stash`, `reset`, `merge`, `rebase`, `force` ou `push` automaticamente. Se o worktree estiver sujo, `main` estiver divergente ou a branch já existir, ela bloqueia e pede decisão humana.
-
-# Política de versionamento (v4)
-
-- Artefatos gerados por skill permanecem local-only por padrão.
-- Escopo mínimo local-only: `.github/copilot-knowledge/` e `.github/legacy-discovery/installation.json`.
-- Artefatos gerados pelo Spec Kit (`.specify/` e `specs/`) seguem a política normal de versionamento da equipe.
-- O instalador configura `.git/info/exclude` local para reduzir stage acidental.
-
-Comando para arquivar artefatos/metadados da skill e reduzir poluição local:
-
-```bash
-python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive
-python .github/skill-contracts/scripts/archive_skill_artifacts.py --root . --mode archive-and-clean
-```
-
-# Refinamento técnico com PO — `refine-user-story`
-
-Quando o PM entrega uma User Story, a skill `refine-user-story` faz o papel de **PO técnico**: confronta a história com o AS-IS já descoberto e produz um `STORY_REFINEMENT` — o artefato de planejamento de execução (refinamento técnico) que o Spec Kit vai consumir.
-
-```text
-História do PM ──► prepare-speckit-context ──► HANDOFF (AS-IS)
-                                                   │
-                                                   ▼
-                                          refine-user-story
-                                                   │
-                     ┌─────────────────────────────┼──────────────────────────┐
-                     ▼                             ▼                          ▼
-               AWAITING_HUMAN               READY_FOR_SPECKIT              BLOCKED
-          perguntas ao humano ─resposta─►  (após revisão humana)      (falta handoff/…)
-                                                   │
-                                                   ▼
-                              prepare-feature-branch ──► /speckit.specify …
-```
-
-Exemplo de pedido:
-
-```text
-Use a skill refine-user-story para refinar esta história do PM:
-
-<cole a história exatamente como o PM escreveu>
-
-Use o HANDOFF-0003 como base AS-IS.
-Quem decide regra de negócio: <nome do PM>.
-```
-
-## O que o refinamento contém
-
-- a história **literal** do PM, separada de qualquer interpretação;
-- avaliação INVEST + Definition of Ready;
-- registro de ambiguidades `AMB-NN`, cada uma com a fonte que a respondeu;
-- critérios de aceite `AC-NN` (Given/When/Then), cada um com origem rastreável;
-- guardrails de regressão `GR-NN`: o que não pode mudar e como será provado;
-- plano de execução em fatias `SLICE-NN`, com ordem, AC/GR cobertos e o passo do ferramental;
-- o que **não** foi decidido (fica para o humano e para o `/speckit.plan`).
-
-## Ambiguidades: quem responde
-
-**O código responde "como é hoje". Só o humano responde "como deve ser".**
-
-```text
-STORY → KNOWLEDGE (handoff/impact/…) → CODE (só fato AS-IS, até 8 arquivos) → HUMAN
-```
-
-Intenção de negócio, escopo, conflito entre história e AS-IS, contrato externo e dado sensível vão **direto** ao humano. A pergunta é fechada, com opções e consequência; a sugestão do PO nunca é aplicada sem resposta.
-
-## Guardrails verificados por script
-
-`validate_artifacts.py` recusa um refinamento `READY_FOR_SPECKIT` quando:
-
-- o handoff relacionado não existe ou não está `READY_FOR_SPECKIT`;
-- há pergunta `OPEN_HUMAN` bloqueante;
-- não há revisão humana (`reviewed_by` / `reviewed_at`);
-- um AC nasce de pergunta não respondida, ou não tem origem;
-- algum AC ou guardrail não está coberto por nenhuma fatia, ou há ciclo entre fatias;
-- faltam guardrails de regressão (ou a justificativa `NO_EXISTING_BEHAVIOR_AFFECTED`).
-
-A skill não escreve em `.specify/`/`specs/`, não decide arquitetura, não cria tasks de código, não mexe em Git e não edita artefatos de outras skills. O refinamento é **local-only**, como os demais artefatos de skill.
-
----
-
-# Testes de não-regressão do pacote
-
-O pacote traz `tests/` (não é instalado no repositório). Rode na raiz do pacote:
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-A suíte prova que:
-
-- sem refinamentos, `validate_artifacts.py`, `sync_index.py` e `next_id.py` produzem **saída idêntica, byte a byte,** à da versão anterior (cópia congelada em `tests/baseline_v4_scripts/`);
-- os arquivos das 5 skills anteriores e do workflow V1 são idênticos aos da versão anterior (`tests/baseline_v4_skill_digests.json`);
-- o instalador preserva conhecimento existente, `.git/info/exclude` e o arquivamento V1;
-- cada guardrail do refinamento recusa o caso que deveria recusar.
-
-> No Windows, descompacte o pacote num caminho curto (ex.: `C:\Ferramentas\`). Caminhos acima de 260 caracteres fazem o Python ignorar arquivos profundos.
-
----
-
-# Quando usar cada Skill?
-
-| Quero... | Use |
+| Eu quero... | Digite |
 |---|---|
-| entender uma área do legado | `analyze-legacy-solution` |
-| investigar bug complexo | `investigate-legacy-bug` |
-| saber o raio de impacto | `analyze-change-impact` |
-| preparar uma US para o Spec Kit | `prepare-speckit-context` |
-| refinar a história do PM (PO técnico) | `refine-user-story` |
-| criar a branch segura da mudança | `prepare-feature-branch` |
-| especificar o TO-BE | `/speckit.specify` |
-| definir arquitetura futura | `/speckit.plan` |
-| decompor implementação | `/speckit.tasks` |
-| implementar | `/speckit.implement` |
+| Entender como uma parte funciona | `/legacy.analyze Como funciona o cálculo de multa?` |
+| Achar a causa de um bug | `/legacy.bug` + o que acontece, o que deveria acontecer, onde |
+| Saber o que quebra se eu mexer numa coisa | `/legacy.impact` + o que vai mudar |
+| Ver o andamento das histórias | `/legacy.status` |
+| Ver todos os comandos | `/legacy.help` |
+| Checar se está tudo em ordem | `/legacy.validate` |
+
+`/legacy.bug` **só investiga, nunca corrige.** Ele devolve as causas mais prováveis, com a evidência de cada uma.
 
 ---
 
-# Regra simples para não se perder
+## Regras que a ferramenta impõe (e por quê)
 
-```text
-QUERO ENTENDER
-      ↓
-Legacy Discovery
+| A IA **não pode** | Motivo |
+|---|---|
+| Aprovar um refinamento | Só uma pessoa decide que o pedido está claro |
+| Escrever código de produção durante a análise | Análise é para entender, não para alterar |
+| Fazer `git commit`, `push` ou trocar de branch por conta própria | Nada é publicado sem você |
+| Mexer nas próprias regras | Senão ela poderia afrouxá-las para passar |
 
-QUERO MUDAR
-      ↓
-prepare-speckit-context
-      ↓
-HANDOFF
-      ↓
-refine-user-story  ⇄  humano responde
-      ↓
-REFINEMENT
-      ↓
-prepare-feature-branch
-      ↓
-Spec Kit
-```
+Se ela tentar e a trava negar, é normal: ela explica o motivo e diz o que **você** precisa fazer. Não tente contornar.
+
+Os arquivos que a IA gera na análise ficam **só no seu computador** (`.github/copilot-knowledge/`) e não vão para o Git.
 
 ---
 
-# Backup
+## Deu problema?
 
-Antes de alterar arquivos controlados pelo bundle, o instalador cria um backup em:
+| Sintoma | O que fazer |
+|---|---|
+| `/legacy.` não mostra nenhum comando | Confirme que o chat está em **Agent**; feche e reabra o VS Code |
+| "python não é reconhecido" | Instale o Python 3.11+ marcando **Add to PATH** e reabra o VS Code |
+| A instalação falhou no meio | Rode o `.bat` de novo; ele é seguro de repetir. Os backups ficam em `backups/` |
+| A IA parou e não avança | Digite `/legacy.status`: ele diz o que está esperando de você |
+| Mensagem de erro que você não entende | Digite `/legacy.validate` e veja o capítulo 34 do Manual |
 
-```text
-<PASTA-DESTE-INSTALADOR>/backups/<repositorio>-AAAAmmdd-HHMMSS/
-```
-
-Depois da instalação, sempre confira:
-
-```bash
-git status
-git diff
-```
+Mais casos no [capítulo 37 do Manual](docs/MANUAL.md#37-solução-de-problemas).
 
 ---
 
-# Instalação manual / avançada
+## Quer saber mais?
 
-PowerShell:
+- **[Manual](docs/MANUAL.md)**: começa por um guia prático para iniciantes e depois aprofunda cada comando, exemplos completos e referência.
+- **Instalação por linha de comando, Linux/macOS, atualização de versão anterior:** capítulos 8 a 10 do Manual.
+- **Como a trava de segurança funciona por dentro:** capítulo 31 do Manual.
 
-```powershell
-.\install.ps1 -TargetPath "C:\Projetos\MeuSistemaLegado"
-```
-
-Python:
-
-```bash
-python install.py --target "C:\Projetos\MeuSistemaLegado"
-```
-
-Linux/macOS:
-
-```bash
-./install.sh /caminho/do/repositorio
-```
-
-Se o Spec Kit já estiver instalado e você quiser apenas atualizar o Discovery:
-
-```bash
-python install.py --target /caminho/repo --skip-speckit-install --skip-speckit-init
-```
-
-Para manter as skills V1 ativas durante uma migração temporária:
-
-```bash
-python install.py --target /caminho/repo --keep-legacy-v1
-```
-
----
-
-# Versões deste pacote
-
-```text
-Bundle:              1.4.1
-Legacy Discovery:    V2.4
-Spec Kit / CLI:      1.0.1
-Integração padrão:   GitHub Copilot
-Python mínimo:       3.11
-```
-
-Consulte também:
-
-```text
-bundle.json
-vendor/spec-kit/README.md
-payload/legacy-discovery/
-```
+<sub>Bundle 1.4.1 · Legacy Discovery V2.4 · Spec Kit oficial 1.0.1 · GitHub Copilot · Python 3.11+ · mais de 100 testes automatizados em Windows e Linux</sub>

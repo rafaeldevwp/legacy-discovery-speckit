@@ -7,6 +7,7 @@ Versão do pacote: **bundle 1.4.1 · Legacy Discovery V2.4 · Spec Kit 1.0.1 · 
 
 | Se você quer... | Vá para |
 |---|---|
+| **usar agora, sem teoria** | [Comece aqui](#comece-aqui--guia-prático-para-quem-nunca-usou) |
 | entender a ideia em 5 minutos | [Parte I](#parte-i--entender) |
 | instalar | [capítulo 8](#8-instalação-nova) |
 | refinar uma história agora | [capítulo 22](#22-exemplo-completo-uma-história-do-pm-do-início-ao-fim) |
@@ -17,6 +18,9 @@ Versão do pacote: **bundle 1.4.1 · Legacy Discovery V2.4 · Spec Kit 1.0.1 · 
 
 ## Índice
 
+**Comece aqui — guia prático**
+
+- [G1 a G10: da instalação à primeira história aprovada](#comece-aqui--guia-prático-para-quem-nunca-usou)
 
 **Parte I — Entender**
 
@@ -86,6 +90,191 @@ Versão do pacote: **bundle 1.4.1 · Legacy Discovery V2.4 · Spec Kit 1.0.1 · 
 - [43. Migração e histórico de versões](#43-migração-e-histórico-de-versões)
 - [44. Limites conhecidos](#44-limites-conhecidos)
 - [45. Cola rápida](#45-cola-rápida)
+
+---
+
+# Comece aqui — guia prático para quem nunca usou
+
+> Esta parte é para quem só quer **usar**. Não precisa entender a arquitetura. O resto do manual é consulta: volte a ele quando precisar.
+
+## G1. A ferramenta em 30 segundos
+
+Você tem um sistema antigo e alguém (o PM) pede uma mudança. Em vez de a IA sair programando, ela:
+
+1. **descobre** como o sistema faz aquilo hoje;
+2. **pergunta** o que ficou vago no pedido (você leva as perguntas ao PM);
+3. **espera você aprovar**;
+4. só então deixa o Spec Kit especificar e programar.
+
+Você conversa com ela pelo chat do Copilot, digitando comandos que começam com `/legacy.`. Não há tela nem menu para aprender.
+
+## G2. Palavras que você vai ver
+
+| Palavra | Significa, em português simples |
+|---|---|
+| **Legado** | o sistema antigo em que você trabalha |
+| **História / US** | o pedido de mudança escrito pelo PM |
+| **AS-IS** | "como é hoje" |
+| **TO-BE** | "como vai ficar" |
+| **HANDOFF** | a ficha que descreve o AS-IS da mudança pedida |
+| **REFINEMENT** | o pedido já esclarecido: perguntas, respostas e o que não pode quebrar |
+| **AMB-01, AMB-02…** | as perguntas em aberto sobre o pedido (de "ambiguidade") |
+| **Bloqueante** | pergunta sem a qual não dá para seguir |
+| **Agent Mode** | o modo do chat do Copilot que executa tarefas, não só responde |
+| **Trava / fechadura** | o mecanismo que impede a IA de aprovar, publicar ou mexer em código de produção |
+
+## G3. Antes de começar: 4 verificações
+
+Abra o terminal (no VS Code: menu **Terminal → Novo Terminal**) e rode:
+
+```bash
+git --version
+python --version
+```
+
+Os dois precisam mostrar um número (Python **3.11 ou maior**). Depois confira no VS Code que o Copilot aparece e que o chat tem a opção **Agent**.
+
+## G4. Instalar, passo a passo
+
+1. **Faça commit do seu trabalho** pendente no repositório. Não sabe como? Peça ao time. É só para não misturar coisas.
+2. **Baixe o `.zip`** em [Releases](https://github.com/rafaeldevwp/legacy-discovery-speckit/releases/latest) e **descompacte em `C:\Ferramentas\`** (pasta curta).
+3. **Dois cliques em `INSTALAR-WINDOWS.bat`**.
+4. Quando pedir `Repositorio:`, cole o caminho da pasta do seu sistema, a que contém a pasta `.git`.
+5. Aguarde **INSTALAÇÃO CONCLUÍDA**.
+
+Se o instalador falhar, rode de novo. Ele é seguro de repetir e guarda backup em `backups/`.
+
+**Testando:** abra o repositório no VS Code, chat em **Agent**, digite `/legacy.help`. Se listar comandos, está pronto. (Testes mais completos: [capítulo 12](#12-conferir-se-deu-certo-e-testar-a-fechadura).)
+
+## G5. Os primeiros 15 minutos
+
+Uma vez por sistema:
+
+```text
+/speckit.constitution
+Este é um sistema legado crítico. Preserve contratos e compatibilidade.
+Não modernize sem justificativa. Não trate palpite como fato.
+```
+
+```text
+/legacy.analyze Visão geral: projetos, responsabilidades e integrações externas.
+```
+
+A IA pergunta o escopo e a profundidade. Responda curto ("estrutural, sem aprofundar classes"). No fim, o mapa fica salvo em `.github/copilot-knowledge/` e será reaproveitado nos próximos pedidos.
+
+## G6. O caminho mais comum: uma história do PM
+
+Esta é a rotina. Siga na ordem.
+
+**Passo 1: entregue a história.** Copie **exatamente como o PM escreveu** e diga quem decide regra de negócio:
+
+```text
+/legacy.story
+US-4821: Como atendente, quero que a consulta de veículos mostre a última
+situação conhecida quando o serviço externo demorar.
+
+Quem decide regra de negócio: Marina (PM).
+```
+
+**Passo 2: veja onde a IA parou.** Ela sempre para em um destes pontos:
+
+| Ela disse | O que significa | Você faz |
+|---|---|---|
+| `AWAITING_HUMAN` | tem perguntas para uma pessoa | Passo 3 |
+| `BLOCKED` | falta algo para continuar (ela explica o quê) | resolva o que ela pediu e rode `/legacy.story` de novo |
+| `READY_FOR_REVIEW` | sem perguntas bloqueantes, esperando você | Passo 4 |
+
+**Passo 3: responda as perguntas.** Leve as perguntas (AMB-01, AMB-02…) à pessoa certa e volte com as respostas:
+
+```text
+/legacy.answer REFINEMENT-0001
+AMB-01: até 24 horas; depois disso, mostrar aviso de dado desatualizado.
+AMB-02: mostrar "serviço indisponível, tente em alguns minutos".
+Respondido por: Marina (PM).
+```
+
+Cole a resposta **como a pessoa deu**. Se for vaga ("o normal"), a IA pergunta de novo. Se surgir pergunta nova, repita este passo.
+
+**Passo 4: prepare a aprovação.**
+
+```text
+/legacy.approve REFINEMENT-0001
+```
+
+A IA mostra um resumo (o que será feito, o que **não** pode quebrar, o que ficou de fora). **Leia com calma**: é o seu momento de barrar erro. Ela termina entregando um comando parecido com este:
+
+```text
+python .github/skill-contracts/scripts/approve_refinement.py --id REFINEMENT-0001 --reviewer "Seu Nome"
+```
+
+**Passo 5: aprove você mesmo.** Cole esse comando no **terminal do VS Code** (não no chat). Ele pede que você digite o ID para confirmar. Depois disso, o refinamento fica `READY_FOR_SPECKIT`.
+
+> A IA **não consegue** fazer o passo 5, de propósito. É isso que garante que quem aprovou foi uma pessoa.
+
+**Passo 6: crie a branch.**
+
+```text
+/legacy.branch consulta-veiculos-timeout
+```
+
+**Passo 7: passe para o Spec Kit.** Troque o chat para **Agent** e rode, em ordem:
+
+```text
+/speckit.specify US-4821 ... Leia o HANDOFF-0001 e o REFINEMENT-0001.
+/speckit.clarify
+/speckit.plan
+/speckit.tasks
+/speckit.analyze
+/speckit.implement
+/speckit.converge
+```
+
+**Perdeu o fio?** `/legacy.status` mostra cada história, o passo em que está e o próximo comando.
+
+O mesmo caminho, detalhado com todas as telas: [capítulo 22](#22-exemplo-completo-uma-história-do-pm-do-início-ao-fim).
+
+## G7. Outras tarefas rápidas
+
+| Situação | Faça | Detalhes |
+|---|---|---|
+| Quero entender uma parte do sistema | `/legacy.analyze Como funciona X?` | [cap. 14](#14-analyze-legacy-solution--entender-o-sistema) |
+| Há um bug e não sei onde | `/legacy.bug` com sintoma, esperado, exemplo e ambiente | [cap. 23](#23-exemplo-completo-um-bug-do-sintoma-à-correção) |
+| Vou mexer em X: o que pode quebrar? | `/legacy.impact X, mudança de comportamento` | [cap. 16](#16-analyze-change-impact--o-raio-de-impacto) |
+| Voltei depois de dias | `/legacy.status`, e depois o comando que ele indicar | [cap. 25.4](#25-outros-cenários) |
+| Mudei de ideia depois de aprovar | novo refinamento; a aprovação antiga não vale para conteúdo alterado | [cap. 25.10](#25-outros-cenários) |
+
+`/legacy.bug` só investiga. Ele devolve as causas prováveis com evidência e **nunca altera código**.
+
+## G8. Quando a trava disser "não"
+
+Se a IA tentar algo proibido (aprovar, `git push`, escrever fora da pasta de conhecimento…), a trava nega e a IA explica o motivo. Isso **não é erro**: é o sistema funcionando. O que fazer:
+
+- se a IA disser que **você** deve executar algo (como a aprovação), execute no seu terminal;
+- não peça para ela "dar um jeito"; ela não vai (nem deve) contornar;
+- para ver o que foi negado: pasta `.github/copilot-knowledge/governance-log/`.
+
+## G9. Se algo der errado
+
+| Sintoma | Solução |
+|---|---|
+| `/legacy.` não lista comandos | chat em **Agent**? Feche e reabra o VS Code |
+| "python não é reconhecido" | instale Python 3.11+ marcando **Add to PATH**; reabra o VS Code |
+| A IA travou e não avança | `/legacy.status` mostra o que ela espera de você |
+| Erro de validação incompreensível | `/legacy.validate` e consulte o [capítulo 34](#34-mensagens-do-validador-e-como-corrigir) |
+| Quer limpar os arquivos locais | `/legacy.archive` |
+
+Mais casos: [capítulo 37](#37-solução-de-problemas) e [perguntas frequentes](#38-perguntas-frequentes).
+
+## G10. Cola de bolso
+
+```text
+NOVA HISTÓRIA   /legacy.story <história do PM>   Quem decide: <nome>
+RESPONDER       /legacy.answer REFINEMENT-NNNN AMB-01: ...; AMB-02: ...
+APROVAR         /legacy.approve REFINEMENT-NNNN   →  cole o comando no SEU terminal
+BRANCH          /legacy.branch <nome-curto>
+CONSTRUIR       /speckit.specify → clarify → plan → tasks → analyze → implement → converge
+PERDIDO         /legacy.status   ·   /legacy.help
+```
 
 ---
 
